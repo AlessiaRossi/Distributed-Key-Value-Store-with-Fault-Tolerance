@@ -1,0 +1,1 @@
+# Contiene la logica del server web e l'inerfaccia del database distribuito.
