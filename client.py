@@ -117,3 +117,47 @@ class DistributedKVClient:
                 print(f"Failed: {response.status_code}, Error: {error_message}, Message: {detailed_message}")
         except ValueError:
             print(f"Failed: {response.status_code}, Response: {response.text}")
+
+# Method for demonstrate the behavior of a distributed key-value store system in scenarios of node failure and
+# recovery
+def demonstrate_fail_recover_behavior(client):
+    print("\n--- Demonstrating Fail-Recover Behavior ---")
+
+    # Step 1: Writing initial data
+    print("\nStep 1: Writing initial data...")
+    client.write('key1', 'value1')
+    client.write('key2', 'value2')
+
+    # Verifying the written data
+    print("\nVerifying initial data...")
+    client.read('key1')
+    client.read('key2')
+
+    # Step 2: Failing a node
+    print("\nStep 2: Failing a node (node 1)...")
+    client.fail_node(1)
+
+    # Step 3: Verifying data availability after node failure
+    print("\nStep 3: Verifying data availability after node failure...")
+    client.read('key1')
+    client.read('key2')
+
+    # Step 4: Writing additional data during node failure
+    print("\nStep 4: Writing additional data while node 1 is failed...")
+    client.write('key3', 'value3')
+
+    # Verifying the data written during node failure
+    print("\nVerifying data written during node failure...")
+    client.read('key3')
+
+    # Step 5: Recovering the failed node
+    print("\nStep 5: Recovering the failed node (node 1)...")
+    client.recover_node(1)
+
+    # Step 6: Verifying data synchronization after node recovery
+    print("\nStep 6: Verifying data synchronization after node recovery...")
+    client.read('key1')
+    client.read('key2')
+    client.read('key3')
+
+    print("\n--- Demonstration Completed ---")
