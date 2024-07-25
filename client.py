@@ -62,13 +62,58 @@ class DistributedKVClient:
 
     # Method for node recovery
       # Send a POST request to the server to recover a failed node
+    def recover_node(self, node_id):
+        if not self.validate_node_id(node_id):
+            return
+        url = f"{self.base_url}/recover/{node_id}"
+        response = requests.post(url, headers=self.headers)
+        self.handle_response(response)
 
     # Method to get the status of all nodes
       # Send a GET request to the server to get the status of all nodes
+    def get_nodes(self):
+        url = f"{self.base_url}/nodes"
+        response = requests.get(url, headers=self.headers)
+        self.handle_response(response)
 
     # Method to recover all nodes
       # Send a POST request to the server to recover all failed nodes
+    def recover_all_nodes(self):
+        url = f"{self.base_url}/nodes"
+        response = requests.get(url, headers=self.headers)
+        if response.status_code == 200:
+            nodes_status = response.json().get('nodes', [])
+            all_alive = True
+            for node in nodes_status:
+                if node['status'] == 'dead':
+                    all_alive = False
+                    self.recover_node(node['node_id'])
+            if all_alive:
+                print(
+                    f"Success: 200, Status: success, Message: All nodes are already alive")
+        else:
+            self.handle_response(response)
 
     # Method for handling the response
     def handle_response(self, response):
-        pass
+        try:
+            data = response.json()
+            if response.status_code == 200:
+                status = data.get('status', 'success')
+                message = data.get('message', 'Operation completed successfully')
+                value = data.get('value', '')
+                nodes = data.get('nodes', [])
+                if value:
+                    print(f"Success: {response.status_code}, Status: {status}, Message: {message}, Value: {value}")
+                elif nodes:
+                    print(f"Success: {response.status_code}, Status: {status}")
+                    for node in nodes:
+                        print(f"Node ID: {node['node_id']}, Status: {node['status']}, Port: {node['port']}")
+                else:
+                    print(f"Success: {response.status_code}, Status: {status}, Message: {message}")
+            else:
+                error_message = data.get('error', 'Unknown error')
+                detailed_message = data.get('message', 'No detailed message provided')
+                print(f"Failed: {response.status_code}, Error: {error_message}, Message: {detailed_message}")
+        except ValueError:
+            print(f"Failed: {response.status_code}, Response: {response.text}")
