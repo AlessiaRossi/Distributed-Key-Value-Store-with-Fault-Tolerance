@@ -161,3 +161,71 @@ def demonstrate_fail_recover_behavior(client):
     client.read('key3')
 
     print("\n--- Demonstration Completed ---")
+
+
+# This script is the entry point for a command-line interface (CLI) to interact with a distributed key-value store.
+if __name__ == "__main__":
+    # Base URL for the distributed key-value store API
+    base_url = "http://127.0.0.1:5000"
+
+    # API token for authentication (replace with the actual token)
+    api_token = "your_api_token_here"
+
+    # Create an instance of the DistributedKVClient with the base URL and API token
+    client = DistributedKVClient(base_url, api_token)
+
+    # Infinite loop to display options and perform corresponding actions based on user input
+    while True:
+        # Print the available options to the user
+        print("\nOptions:")
+        print("1. Write key-value")
+        print("2. Read value by key")
+        print("3. Delete key-value")
+        print("4. Fail a node")
+        print("5. Recover a node")
+        print("6. Get nodes status")
+        print("7. Demonstrate fail-recover behavior")
+        print("8. Recover all nodes")
+        print("9. Exit")
+
+        # Prompt the user to enter their choice
+        choice = input("Enter your choice: ")
+
+        # Execute actions based on the user's choice
+        if choice == '1':
+            # Option to write a key-value pair
+            key = input("Enter key: ")
+            value = input("Enter value: ")
+            client.write(key, value)
+        elif choice == '2':
+            # Option to read a value by key
+            key = input("Enter key: ")
+            client.read(key)
+        elif choice == '3':
+            # Option to delete a key-value pair
+            key = input("Enter key: ")
+            client.delete(key)
+        elif choice == '4':
+            # Option to fail a specific node
+            node_id = input("Enter node ID to fail: ")
+            client.fail_node(node_id)
+        elif choice == '5':
+            # Option to recover a specific node
+            node_id = input("Enter node ID to recover: ")
+            client.recover_node(node_id)
+        elif choice == '6':
+            # Option to get the status of all nodes
+            client.get_nodes()
+        elif choice == '7':
+            # Option to demonstrate the fail-recover behavior
+            demonstrate_fail_recover_behavior(client)
+        elif choice == '8':
+            # Option to recover all nodes
+            client.recover_all_nodes()
+        elif choice == '9':
+            # Exit the program
+            break
+        else:
+            # Handle invalid choices
+            print("Invalid choice. Please try again.")
+
