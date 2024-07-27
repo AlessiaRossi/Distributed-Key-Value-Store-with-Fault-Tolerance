@@ -1,5 +1,3 @@
-
-
 import sqlite3
 import os
 
@@ -74,14 +72,4 @@ class ReplicaNode:
                 conn.close()
                 for key, value in rows:
                     self.write(key, value)
-
-
-
-
-
-
-
-
-
-
-
+                    
