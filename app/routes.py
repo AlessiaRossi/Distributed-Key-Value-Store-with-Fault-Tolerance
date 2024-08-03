@@ -1,12 +1,13 @@
 from flask import request, jsonify
 from functools import wraps
-from .models import ReplicaNode
 from .models import ReplicationManager
 
-API_TOKEN = "your_api_token_here"  # Sostituisci con un token sicuro
+API_TOKEN = "your_api_token_here"  # Replace with a secure token
 
+# Initialize the replication manager with a replication factor of 3
 replication_manager = ReplicationManager(replication_factor=3)
 
+# Decorator to require a valid API token
 def require_api_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -15,7 +16,10 @@ def require_api_token(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# Function to register the routes with the Flask app
 def register_routes(app):
+
+    # Route for writing data
     @app.route('/write', methods=['POST'])
     @require_api_token
     def write():
@@ -32,6 +36,7 @@ def register_routes(app):
         except Exception as e:
             return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
 
+    # Route for reading data
     @app.route('/read/<key>', methods=['GET'])
     @require_api_token
     def read(key):
@@ -44,6 +49,7 @@ def register_routes(app):
         except Exception as e:
             return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
 
+    # Route for deleting data
     @app.route('/delete/<key>', methods=['DELETE'])
     @require_api_token
     def delete(key):
@@ -55,6 +61,7 @@ def register_routes(app):
         except Exception as e:
             return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
 
+    # Route for failing a node
     @app.route('/fail/<int:node_id>', methods=['POST'])
     @require_api_token
     def fail_node(node_id):
@@ -64,15 +71,17 @@ def register_routes(app):
         except Exception as e:
             return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
 
+    # Route for recovering a node
     @app.route('/recover/<int:node_id>', methods=['POST'])
     @require_api_token
     def recover_node(node_id):
        try:
             replication_manager.recover_node(node_id)
             return jsonify({'status': 'success', 'message': f'Node {node_id} recovered'})
-        except Exception as e:
-            return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
+       except Exception as e:
+           return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
 
+    # Route for getting the status of all nodes
     @app.route('/nodes', methods=['GET'])
     @require_api_token
     def get_nodes():
