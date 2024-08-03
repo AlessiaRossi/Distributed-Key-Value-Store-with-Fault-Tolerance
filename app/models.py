@@ -72,4 +72,51 @@ class ReplicaNode:
                 conn.close()
                 for key, value in rows:
                     self.write(key, value)
+
+
+class ReplicationManager:
+    def __init__(self, replication_factor):
+        self.replication_factor = replication_factor
+        self.nodes = [ReplicaNode(i, 5000 + i) for i in range(replication_factor)]
+
+    def write_to_replicas(self, key, value):
+        for node in self.nodes:
+            if node.is_alive():
+                node.write(key, value)
+
+    def read_from_replicas(self, key):
+        for node in self.nodes:
+            if node.is_alive():
+                result = node.read(key)
+                if result is not None:
+                    return {'value': result, 'message': f'Read from replica {node.node_id}'}
+        return {'value': None, 'message': 'All replicas failed or key not found'}
+
+    def delete_from_replicas(self, key):
+        for node in self.nodes:
+            node.delete(key)
+
+    def key_exists_in_replicas(self, key):
+        for node in self.nodes:
+            if node.is_alive() and node.key_exists(key):
+                return True
+        return False
+
+    def fail_node(self, node_id):
+        if 0 <= node_id < len(self.nodes):
+            self.nodes[node_id].fail()
+
+    def recover_node(self, node_id):
+        if 0 <= node_id < len(self.nodes):
+            self.nodes[node_id].recover(self.nodes)
+
+    def get_nodes_status(self):
+        return [
+            {
+                'node_id': node.node_id,
+                'status': 'alive' if node.is_alive() else 'dead',
+                'port': node.port
+            }
+            for node in self.nodes
+        ]
                     
