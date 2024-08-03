@@ -3,5 +3,14 @@ __pycache__/*
 .DS_Store
 instance/
 .webassets-cache
+
 .env
 venv/*
+
+db/*.sqlite3
+db/*.db
+db/*.sql
+db/*.log
+
+config/database.yml
+config/*.sqlite3

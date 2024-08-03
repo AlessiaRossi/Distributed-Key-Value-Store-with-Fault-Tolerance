@@ -17,6 +17,12 @@ class DistributedKVClient:
             return False
         return True
 
+    def validate_value(self, value):
+        if not value or value.strip() == "":
+            print("Error: Value cannot be empty or whitespace.")
+            return False
+        return True
+
     def validate_node_id(self, node_id):
         if not str(node_id).isdigit():  # Value should be a string
             print("Error: Node ID must be a valid integer.")
@@ -26,21 +32,27 @@ class DistributedKVClient:
     # Method to write a key and value to the server
       # Send a POST request to the server with the key and value
     def write(self, key, value):
-        if not self.validate_key(key):
+        if not self.validate_key(key) or not self.validate_value(value):
             return
         url = f"{self.base_url}/write"
         data = {"key": key, "value": value}
-        response = requests.post(url, json=data, headers=self.headers)
-        self.handle_response(response)  
+        try:
+            response = requests.post(url, json=data, headers=self.headers)
+            self.handle_response(response)
+        except requests.RequestException as e:
+            print(f"Request failed: {e}")
 
     # Method to read the value associated with a key
       # Send a GET request to the server
     def read(self, key):
-        if not self.validate_key(key):
+        if not self.validate_key(key) or not self.validate_value(value):
             return
         url = f"{self.base_url}/read/{key}"
-        response = requests.get(url, headers=self.headers)
-        self.handle_response(response)
+        try:
+            response = requests.get(url, headers=self.headers)
+            self.handle_response(response)
+        except requests.RequestException as e:
+            print(f"Request failed: {e}")
 
     # Method to delete a value associated with a key
       # Send a DELETE request to the server
@@ -49,7 +61,12 @@ class DistributedKVClient:
             return
         url = f"{self.base_url}/delete/{key}"
         response = requests.delete(url, headers=self.headers)
-        self.handle_response(response)
+        url = f"{self.base_url}/delete/{key}"
+        try:
+            response = requests.delete(url, headers=self.headers)
+            self.handle_response(response)
+        except requests.RequestException as e:
+            print(f"Request failed: {e}")
 
     # Method for node failure
       # Send a POST request to the server to mark a node as failed
@@ -57,8 +74,11 @@ class DistributedKVClient:
         if not self.validate_node_id(node_id):
             return
         url = f"{self.base_url}/fail/{node_id}"
-        response = requests.post(url, headers=self.headers)
-        self.handle_response(response)
+        try:
+            response = requests.post(url, headers=self.headers)
+            self.handle_response(response)
+        except requests.RequestException as e:
+            print(f"Request failed: {e}")
 
     # Method for node recovery
       # Send a POST request to the server to recover a failed node
@@ -66,33 +86,42 @@ class DistributedKVClient:
         if not self.validate_node_id(node_id):
             return
         url = f"{self.base_url}/recover/{node_id}"
-        response = requests.post(url, headers=self.headers)
-        self.handle_response(response)
+        try:
+            response = requests.post(url, headers=self.headers)
+            self.handle_response(response)
+        except requests.RequestException as e:
+            print(f"Request failed: {e}")
 
     # Method to get the status of all nodes
       # Send a GET request to the server to get the status of all nodes
     def get_nodes(self):
         url = f"{self.base_url}/nodes"
-        response = requests.get(url, headers=self.headers)
-        self.handle_response(response)
+        try:
+            response = requests.get(url, headers=self.headers)
+            self.handle_response(response)
+        except requests.RequestException as e:
+            print(f"Request failed: {e}")
 
     # Method to recover all nodes
       # Send a POST request to the server to recover all failed nodes
     def recover_all_nodes(self):
         url = f"{self.base_url}/nodes"
-        response = requests.get(url, headers=self.headers)
-        if response.status_code == 200:
-            nodes_status = response.json().get('nodes', [])
-            all_alive = True
-            for node in nodes_status:
-                if node['status'] == 'dead':
-                    all_alive = False
-                    self.recover_node(node['node_id'])
-            if all_alive:
-                print(
-                    f"Success: 200, Status: success, Message: All nodes are already alive")
-        else:
-            self.handle_response(response)
+        try:
+            response = requests.get(url, headers=self.headers)
+            if response.status_code == 200:
+                nodes_status = response.json().get('nodes', [])
+                all_alive = True
+                for node in nodes_status:
+                    if node['status'] == 'dead':
+                        all_alive = False
+                        self.recover_node(node['node_id'])
+                if all_alive:
+                    print(
+                        f"Success: 200, Status: success, Message: All nodes are already alive")
+            else:
+                self.handle_response(response)
+        except requests.RequestException as e:
+            print(f"Request failed: {e}")
 
     # Method for handling the response
     def handle_response(self, response):
