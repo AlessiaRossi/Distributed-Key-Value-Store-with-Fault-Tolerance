@@ -70,7 +70,7 @@ def register_routes(app):
        try:
             replication_manager.recover_node(node_id)
             return jsonify({'status': 'success', 'message': f'Node {node_id} recovered'})
-        except Exception as e:
+       except Exception as e:
             return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
 
     @app.route('/nodes', methods=['GET'])
