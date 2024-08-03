@@ -41,3 +41,17 @@ This project implements a distributed key-value store with fault tolerance using
 - `POST /recover/<int:node_id>`: Recover a failed node.
 - `GET /nodes`: Get the status of all nodes.
 
+## Testing
+
+1. Run the test suite:
+    ```sh
+    python -m unittest discover -s tests
+    ```
+
+## Design Document
+
+Refer to the [design_document.md](design_document.md) for the system architecture, consistency model, and fault tolerance strategies.
+
+## Report
+
+Refer to the [report.md](report.md) for experimental results and analysis.
