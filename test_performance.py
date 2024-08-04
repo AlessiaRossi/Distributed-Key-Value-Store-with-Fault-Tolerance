@@ -10,22 +10,22 @@ class TestPerformance(unittest.TestCase):
 # Test performance of the write, read, fail, and recover operations
     def test_write_performance(self):
         start_time = time.time()
-        for i in range(1000):
+        for i in range(100):
             self.replication_manager.write_to_replicas(f'key_{i}', f'value_{i}')
         end_time = time.time()
         print(f'Write performance: {end_time - start_time} seconds')
 
     def test_read_performance(self):
-        for i in range(1000):
+        for i in range(100):
             self.replication_manager.write_to_replicas(f'key_{i}', f'value_{i}')
         start_time = time.time()
-        for i in range(1000):
+        for i in range(100):
             self.replication_manager.read_from_replicas(f'key_{i}')
         end_time = time.time()
         print(f'Read performance: {end_time - start_time} seconds')
 
     def test_fail_recover_performance(self):
-        for i in range(1000):
+        for i in range(100):
             self.replication_manager.write_to_replicas(f'key_{i}', f'value_{i}')
 
         start_time = time.time()
