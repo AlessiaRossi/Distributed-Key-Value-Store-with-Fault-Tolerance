@@ -228,7 +228,8 @@ if __name__ == "__main__":
         print("6. Get nodes status")
         print("7. Demonstrate fail-recover behavior")
         print("8. Recover all nodes")
-        print("9. Exit")
+        print("9. Set replication strategy")
+        print("10. Exit")
 
         # Prompt the user to enter their choice
         choice = input("Enter your choice: ")
@@ -264,6 +265,13 @@ if __name__ == "__main__":
         elif choice == '8':
             # Option to recover all nodes
             client.recover_all_nodes()
+        elif choice == '9':
+            # Option to set the replication strategy
+            strategy = input("Enter strategy (full/consistent): ")
+            replication_factor = None
+            if strategy == 'consistent':
+                replication_factor = int(input("Enter replication factor: "))
+            client.set_replication_strategy(strategy, replication_factor)
         elif choice == '9':
             # Exit the program
             break
