@@ -8,9 +8,16 @@ class ReplicaNode:
         # Initializes a replica node with a unique identifier and a port.
         self.node_id = node_id
         self.port = port
-        self.db_path = f'replica_{node_id}.db'  # Path to the database file for this node.
+        self.name_db = f'replica_{node_id}.db'  # Name of the database file for this node.
+        self.db_path = os.path.join('db', self.name_db)  # Path to the database file for this node.
         self.alive = True  # Initial state of the node is active.
+        self.create_db_directory() # Creates the 'db' directory if it does not exist.
         self._initialize_db()  # Initializes the database if it does not exist.
+
+    def create_db_directory(self):
+        # Creates the 'db' directory if it does not already exist.
+        if not os.path.exists('db'):
+            os.makedirs('db')  # Creates the directory.
 
     def _initialize_db(self):
         # Creates the 'kv_store' table if it does not already exist in the database.
