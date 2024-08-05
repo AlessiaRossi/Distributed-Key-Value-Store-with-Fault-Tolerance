@@ -1,6 +1,8 @@
 import sqlite3
 import os
 
+
+
 class ReplicaNode:
     def __init__(self, node_id, port):
         # Initializes a replica node with a unique identifier and a port.
@@ -84,24 +86,49 @@ class ReplicaNode:
                     self.write(key, value)  # Writes each key-value pair to the current node's database.
 
 class ReplicationManager:
-    def __init__(self, replication_factor):
+    def __init__(self, replication_factor,strategy='full'):
         # Initializes the replication manager with a specified replication factor.
         self.replication_factor = replication_factor
+        self.strategy = strategy
         # Creates a list of replica nodes with unique identifiers and ports.
         self.nodes = [ReplicaNode(i, 5000 + i) for i in range(replication_factor)]
+        # Initializes the replication strategy based on the specified strategy.
+        if strategy == 'consistent':
+            self.consistent_hash = ConsistentHash(self.nodes, replicas=replication_factor)
+
+    def set_replication_strategy(self, strategy, replication_factor=None):
+        self.strategy = strategy
+        if replication_factor:
+            self.replication_factor = replication_factor
+        if strategy == 'consistent':
+            self.consistent_hash = ConsistentHash(self.nodes, replicas=self.replication_factor)
 
     def write_to_replicas(self, key, value):
         # Writes a key-value pair to all active replica nodes.
-        for node in self.nodes:
-            if node.is_alive():  # Checks if the node is active.
-                node.write(key, value)  # Writes the data to the node.
+        if self.strategy == 'full':
+            for node in self.nodes:
+                if node.is_alive():  # Checks if the node is active.
+                    node.write(key, value)  # Writes the data to the node.
+        # If the replication strategy is 'consistent', writes to the appropriate node based on the key's hash.
+        elif self.strategy == 'consistent':
+            node = self.consistent_hash.get_node(key)
+            if node and node.is_alive():
+                node.write(key, value)
 
     def read_from_replicas(self, key):
         # Reads the value associated with a key from active replica nodes.
-        for node in self.nodes:
-            if node.is_alive():  # Checks if the node is active.
-                result = node.read(key)  # Reads the value from the node.
-                if result is not None:  # If the result is not None, returns the value and a message.
+        if self.strategy == 'full':
+            for node in self.nodes:
+                if node.is_alive():  # Checks if the node is active.
+                    result = node.read(key)  # Reads the value from the node.
+                    if result is not None:  # If the result is not None, returns the value and a message.
+                        return {'value': result, 'message': f'Read from replica {node.node_id}'}
+        # If the replication strategy is 'consistent', reads from the appropriate node based on the key's hash.
+        elif self.strategy == 'consistent':
+            node = self.consistent_hash.get_node(key)
+            if node and node.is_alive():
+                result = node.read(key)
+                if result is not None:
                     return {'value': result, 'message': f'Read from replica {node.node_id}'}
         # If no node returned a value, returns an error message.
         return {'value': None, 'message': 'All replicas failed or key not found'}
