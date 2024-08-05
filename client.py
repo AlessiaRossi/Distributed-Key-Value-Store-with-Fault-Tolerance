@@ -17,25 +17,41 @@ class DistributedKVClient:
             return False
         return True
 
+    # Validation of the value
     def validate_value(self, value):
         if not value or value.strip() == "":
             print("Error: Value cannot be empty or whitespace.")
             return False
         return True
 
+    # Method to validate the node ID
     def validate_node_id(self, node_id):
         if not str(node_id).isdigit():  # Value should be a string
             print("Error: Node ID must be a valid integer.")
             return False
         return True
 
+    # Method to set the replication strategy and replication factor
+    def set_replication_strategy(self, strategy, replication_factor=None):
+        url = f"{self.base_url}/set_replication_strategy"
+        data = {"strategy": strategy}
+        if replication_factor:
+            data["replication_factor"] = replication_factor
+        try:
+            response = requests.post(url, json=data, headers=self.headers)
+            self.handle_response(response)
+        except requests.RequestException as e:
+            print(f"Request failed: {e}")
+
     # Method to write a key and value to the server
       # Send a POST request to the server with the key and value
-    def write(self, key, value):
+    def write(self, key, value, strategy='full', replication_factor=None):
         if not self.validate_key(key) or not self.validate_value(value):
             return
         url = f"{self.base_url}/write"
-        data = {"key": key, "value": value}
+        data = {"key": key, "value": value, "strategy": strategy}
+        if replication_factor:
+            data["replication_factor"] = replication_factor
         try:
             response = requests.post(url, json=data, headers=self.headers)
             self.handle_response(response)
@@ -45,7 +61,7 @@ class DistributedKVClient:
     # Method to read the value associated with a key
       # Send a GET request to the server
     def read(self, key):
-        if not self.validate_key(key) or not self.validate_value(value):
+        if not self.validate_key(key):
             return
         url = f"{self.base_url}/read/{key}"
         try:
@@ -59,8 +75,6 @@ class DistributedKVClient:
     def delete(self, key):
         if not self.validate_key(key):
             return
-        url = f"{self.base_url}/delete/{key}"
-        response = requests.delete(url, headers=self.headers)
         url = f"{self.base_url}/delete/{key}"
         try:
             response = requests.delete(url, headers=self.headers)
@@ -116,8 +130,7 @@ class DistributedKVClient:
                         all_alive = False
                         self.recover_node(node['node_id'])
                 if all_alive:
-                    print(
-                        f"Success: 200, Status: success, Message: All nodes are already alive")
+                    print(f"Success: 200, Status: success, Message: All nodes are already alive")
             else:
                 self.handle_response(response)
         except requests.RequestException as e:
