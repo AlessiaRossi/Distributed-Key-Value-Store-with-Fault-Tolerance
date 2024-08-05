@@ -1,6 +1,6 @@
 import sqlite3
 import os
-
+from .consistent_hash import ConsistentHash
 
 
 class ReplicaNode:
@@ -93,7 +93,7 @@ class ReplicaNode:
                     self.write(key, value)  # Writes each key-value pair to the current node's database.
 
 class ReplicationManager:
-    def __init__(self, replication_factor,strategy='full'):
+    def __init__(self, replication_factor=3 ,strategy='full'):
         # Initializes the replication manager with a specified replication factor.
         self.replication_factor = replication_factor
         self.strategy = strategy
@@ -101,7 +101,9 @@ class ReplicationManager:
         self.nodes = [ReplicaNode(i, 5000 + i) for i in range(replication_factor)]
         # Initializes the replication strategy based on the specified strategy.
         if strategy == 'consistent':
-            self.consistent_hash = ConsistentHash(self.nodes, replicas=replication_factor)
+            self.consistent_hash = ConsistentHash(self.nodes, replicas=self.replication_factor)
+        else:
+            self.consistent_hash = None
 
     def set_replication_strategy(self, strategy, replication_factor=None):
         self.strategy = strategy
@@ -109,6 +111,8 @@ class ReplicationManager:
             self.replication_factor = replication_factor
         if strategy == 'consistent':
             self.consistent_hash = ConsistentHash(self.nodes, replicas=self.replication_factor)
+        else:
+            self.consistent_hash = None
 
     def write_to_replicas(self, key, value):
         # Writes a key-value pair to all active replica nodes.
