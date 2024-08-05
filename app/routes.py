@@ -90,3 +90,17 @@ def register_routes(app):
             return jsonify({'status': 'success', 'nodes': nodes_status})
         except Exception as e:
             return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
+
+    # Route for setting the replication strategy
+    @app.route('/set_replication_strategy', methods=['POST'])
+    @require_api_token
+    def set_replication_strategy():
+        data = request.json
+        if 'strategy' not in data:
+            return jsonify({'error': 'Invalid input', 'message': 'Replication strategy is required'}), 400
+        strategy = data['strategy']
+        replication_factor = data.get('replication_factor', replication_manager.replication_factor)
+        replication_manager.set_replication_strategy(strategy, replication_factor)
+        return jsonify({'status': 'success',
+                        'message': f'Replication strategy set to {strategy} with factor {replication_factor}'})
+
