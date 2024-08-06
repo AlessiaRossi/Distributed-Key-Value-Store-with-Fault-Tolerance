@@ -136,6 +136,16 @@ class DistributedKVClient:
         except requests.RequestException as e:
             print(f"Request failed: {e}")
 
+    def get_nodes_for_key(self, key):
+        if not self.validate_key(key):
+            return
+        url = f"{self.base_url}/nodes_for_key/{key}"
+        try:
+            response = requests.get(url, headers=self.headers)
+            self.handle_response(response)
+        except requests.RequestException as e:
+            print(f"Request failed: {e}")
+
     # Method for handling the response
     def handle_response(self, response):
         try:
@@ -220,59 +230,74 @@ if __name__ == "__main__":
     while True:
         # Print the available options to the user
         print("\nOptions:")
-        print("1. Write key-value")
-        print("2. Read value by key")
-        print("3. Delete key-value")
-        print("4. Fail a node")
-        print("5. Recover a node")
-        print("6. Get nodes status")
-        print("7. Demonstrate fail-recover behavior")
-        print("8. Recover all nodes")
-        print("9. Set replication strategy")
-        print("10. Exit")
+        print("1. Set replication strategy and replication factor (default: full)")
+        print("2. Write key-value")
+        print("3. Read value by key")
+        print("4. Delete key-value")
+        print("5. Fail a node")
+        print("6. Recover a node")
+        print("7. Get nodes status")
+        print("8. Demonstrate fail-recover behavior")
+        print("9. Recover all nodes")
+        print("10. Get nodes for key")
+        print("11. Exit")
 
         # Prompt the user to enter their choice
         choice = input("Enter your choice: ")
 
         # Execute actions based on the user's choice
         if choice == '1':
-            # Option to write a key-value pair
-            key = input("Enter key: ")
-            value = input("Enter value: ")
-            client.write(key, value)
-        elif choice == '2':
-            # Option to read a value by key
-            key = input("Enter key: ")
-            client.read(key)
-        elif choice == '3':
-            # Option to delete a key-value pair
-            key = input("Enter key: ")
-            client.delete(key)
-        elif choice == '4':
-            # Option to fail a specific node
-            node_id = input("Enter node ID to fail: ")
-            client.fail_node(node_id)
-        elif choice == '5':
-            # Option to recover a specific node
-            node_id = input("Enter node ID to recover: ")
-            client.recover_node(node_id)
-        elif choice == '6':
-            # Option to get the status of all nodes
-            client.get_nodes()
-        elif choice == '7':
-            # Option to demonstrate the fail-recover behavior
-            demonstrate_fail_recover_behavior(client)
-        elif choice == '8':
-            # Option to recover all nodes
-            client.recover_all_nodes()
-        elif choice == '9':
             # Option to set the replication strategy
             strategy = input("Enter strategy (full/consistent): ")
             replication_factor = None
             if strategy == 'consistent':
-                replication_factor = int(input("Enter replication factor: "))
+                replication_factor = int(input("Enter replication factor (<3): "))
             client.set_replication_strategy(strategy, replication_factor)
+
+        elif choice == '2':
+            # Option to write a key-value pair
+            key = input("Enter key: ")
+            value = input("Enter value: ")
+            client.write(key, value)
+
+        elif choice == '3':
+            # Option to read a value by key
+            key = input("Enter key: ")
+            client.read(key)
+
+        elif choice == '4':
+            # Option to delete a key-value pair
+            key = input("Enter key: ")
+            client.delete(key)
+
+        elif choice == '5':
+            # Option to fail a specific node
+            node_id = input("Enter node ID to fail: ")
+            client.fail_node(node_id)
+
+        elif choice == '6':
+            # Option to recover a specific node
+            node_id = input("Enter node ID to recover: ")
+            client.recover_node(node_id)
+
+        elif choice == '7':
+            # Option to get the status of all nodes
+            client.get_nodes()
+
+        elif choice == '8':
+            # Option to demonstrate the fail-recover behavior
+            demonstrate_fail_recover_behavior(client)
+
         elif choice == '9':
+            # Option to recover all nodes
+            client.recover_all_nodes()
+
+        elif choice == '10':
+            # Option to get the nodes responsible for a key
+            key = input("Enter key: ")
+            client.get_nodes_for_key(key)
+
+        elif choice == '11':
             # Exit the program
             break
         else:

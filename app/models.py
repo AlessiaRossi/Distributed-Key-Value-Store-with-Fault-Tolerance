@@ -93,17 +93,18 @@ class ReplicaNode:
                     self.write(key, value)  # Writes each key-value pair to the current node's database.
 
 class ReplicationManager:
-    def __init__(self, replication_factor=3 ,strategy='full'):
+    def __init__(self, replication_factor=3 ,strategy='full', nodes=None):
         # Initializes the replication manager with a specified replication factor.
         self.replication_factor = replication_factor
         self.strategy = strategy
         # Creates a list of replica nodes with unique identifiers and ports.
-        self.nodes = [ReplicaNode(i, 5000 + i) for i in range(replication_factor)]
+        self.nodes = nodes
         # Initializes the replication strategy based on the specified strategy.
+        self.consistent_hash = None
         if strategy == 'consistent':
             self.consistent_hash = ConsistentHash(self.nodes, replicas=self.replication_factor)
-        else:
-            self.consistent_hash = None
+
+
 
     def set_replication_strategy(self, strategy, replication_factor=None):
         self.strategy = strategy
@@ -176,3 +177,10 @@ class ReplicationManager:
             }
             for node in self.nodes
         ]
+
+    def get_nodes_for_key(self, key):
+        # Returns the nodes responsible for the key based on the replication strategy.
+        if self.strategy == 'consistent' and self.consistent_hash:
+            return self.consistent_hash.get_nodes_for_key(key)
+        else:
+            return None

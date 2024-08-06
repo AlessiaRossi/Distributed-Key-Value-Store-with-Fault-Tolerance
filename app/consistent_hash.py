@@ -37,3 +37,17 @@ class ConsistentHash:
         if idx == len(self.sorted_keys):
             idx = 0
         return self.ring[self.sorted_keys[idx]]
+
+    def get_nodes_for_key(self, key):
+        # Logic to determine the nodes responsible for the given key
+        if not self.ring:
+            return []
+        hash_key = self._hash(key)
+        idx = bisect.bisect(self.sorted_keys, hash_key)
+        nodes = []
+        for i in range(self.replicas):
+            if idx == len(self.sorted_keys):
+                idx = 0
+            nodes.append(self.ring[self.sorted_keys[idx]])
+            idx += 1
+        return nodes

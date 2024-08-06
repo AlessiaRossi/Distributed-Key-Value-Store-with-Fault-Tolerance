@@ -98,9 +98,24 @@ def register_routes(app):
         data = request.json
         if 'strategy' not in data:
             return jsonify({'error': 'Invalid input', 'message': 'Replication strategy is required'}), 400
-        strategy = data['strategy']
+        strategy = data.get('strategy')
         replication_factor = data.get('replication_factor', replication_manager.replication_factor)
-        replication_manager.set_replication_strategy(strategy, replication_factor)
-        return jsonify({'status': 'success',
-                        'message': f'Replication strategy set to {strategy} with factor {replication_factor}'})
+        try:
+            replication_manager.set_replication_strategy(strategy, replication_factor)
+            return jsonify({'status': 'success',
+                            'message': f'Replication strategy set to {strategy} with factor {replication_factor}'})
+        except Exception as e:
+            return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
 
+    # Route for getting the nodes responsible for a key
+    @app.route('/nodes_for_key/<key>', methods=['GET'])
+    @require_api_token
+    def nodes_for_key(key):
+        try:
+            nodes = replication_manager.get_nodes_for_key(key)
+            if nodes:
+                return jsonify({'status': 'success', 'nodes': nodes})
+            else:
+                return jsonify({'error': 'Invalid strategy', 'message': 'Consistent hashing is not enabled'}), 400
+        except Exception as e:
+            return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
