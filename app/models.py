@@ -93,12 +93,12 @@ class ReplicaNode:
                     self.write(key, value)  # Writes each key-value pair to the current node's database.
 
 class ReplicationManager:
-    def __init__(self, replication_factor=3 ,strategy='full', nodes=None):
+    def __init__(self, replication_factor=3, strategy='full'):
         # Initializes the replication manager with a specified replication factor.
         self.replication_factor = replication_factor
         self.strategy = strategy
         # Creates a list of replica nodes with unique identifiers and ports.
-        self.nodes = nodes
+        self.nodes = [ReplicaNode(i, 5000 + i) for i in range(replication_factor)]
         # Initializes the replication strategy based on the specified strategy.
         self.consistent_hash = None
         if strategy == 'consistent':
