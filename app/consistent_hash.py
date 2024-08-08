@@ -8,6 +8,7 @@ class ConsistentHash:
         self.sorted_keys = []
         if nodes:
             for node in nodes:
+                print(f'Adding node {node.node_id} to the ring')
                 self.add_node(node)
 
     # Hash function to generate a hash key for a given input key

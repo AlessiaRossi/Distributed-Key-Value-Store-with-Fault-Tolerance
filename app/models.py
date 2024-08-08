@@ -103,6 +103,7 @@ class ReplicationManager:
         self.consistent_hash = None
         if strategy == 'consistent':
             self.consistent_hash = ConsistentHash(self.nodes, replicas=self.replication_factor)
+            print(f'ReplicationManager: consistent_hash={self.consistent_hash}')
 
 
 
@@ -114,6 +115,9 @@ class ReplicationManager:
             self.consistent_hash = ConsistentHash(self.nodes, replicas=self.replication_factor)
         else:
             self.consistent_hash = None
+        print(f'Set replication strategy to {strategy}')
+        print(f'Replication factor: {self.replication_factor}')
+        print(f'Consistent hash: {self.consistent_hash}')
 
     def write_to_replicas(self, key, value):
         # Writes a key-value pair to all active replica nodes.
@@ -124,6 +128,7 @@ class ReplicationManager:
         # If the replication strategy is 'consistent', writes to the appropriate node based on the key's hash.
         elif self.strategy == 'consistent':
             node = self.consistent_hash.get_node(key)
+            print(f'Writing to node: {node.node_id}')
             if node and node.is_alive():
                 node.write(key, value)
 
