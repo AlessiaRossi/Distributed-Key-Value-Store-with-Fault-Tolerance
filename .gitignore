@@ -169,3 +169,5 @@ cython_debug/
 *.sqlite3
 
 .idea/
+
+app/__pycache__/models.cpython-39.pyc
