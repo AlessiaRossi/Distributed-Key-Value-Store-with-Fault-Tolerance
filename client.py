@@ -33,6 +33,7 @@ class DistributedKVClient:
 
     # Method to set the replication strategy and replication factor
     def set_replication_strategy(self, strategy, replication_factor=None):
+        strategy = strategy.strip()
         url = f"{self.base_url}/set_replication_strategy"
         data = {"strategy": strategy}
         if replication_factor:
@@ -136,16 +137,6 @@ class DistributedKVClient:
         except requests.RequestException as e:
             print(f"Request failed: {e}")
 
-    def get_nodes_for_key(self, key):
-        if not self.validate_key(key):
-            return
-        url = f"{self.base_url}/nodes_for_key/{key}"
-        try:
-            response = requests.get(url, headers=self.headers)
-            self.handle_response(response)
-        except requests.RequestException as e:
-            print(f"Request failed: {e}")
-
     # Method for handling the response
     def handle_response(self, response):
         try:
@@ -239,8 +230,8 @@ if __name__ == "__main__":
         print("7. Get nodes status")
         print("8. Demonstrate fail-recover behavior")
         print("9. Recover all nodes")
-        print("10. Get nodes for key")
-        print("11. Exit")
+        print("10. Exit")
+
 
         # Prompt the user to enter their choice
         choice = input("Enter your choice: ")
@@ -293,11 +284,6 @@ if __name__ == "__main__":
             client.recover_all_nodes()
 
         elif choice == '10':
-            # Option to get the nodes responsible for a key
-            key = input("Enter key: ")
-            client.get_nodes_for_key(key)
-
-        elif choice == '11':
             # Exit the program
             break
         else:
