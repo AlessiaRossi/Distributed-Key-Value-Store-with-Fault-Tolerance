@@ -32,6 +32,14 @@ This project implements a distributed key-value store with fault tolerance using
 
 2. The application will be available at `http://127.0.0.1:5000`.
 
+3. Use the command-line interface (CLI) to interact with the application:
+    ```sh
+    python client.py
+    ```
+
+4. Follow the on-screen options to perform various operations such as setting replication strategy, writing key-value pairs, reading values, deleting key-value pairs, failing nodes, recovering nodes, and demonstrating fail-recover behavior.
+
+
 ## API Endpoints
 
 - `POST /write`: Write a key-value pair.
