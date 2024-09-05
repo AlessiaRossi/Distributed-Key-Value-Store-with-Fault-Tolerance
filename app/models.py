@@ -127,10 +127,10 @@ class ReplicationManager:
                     node.write(key, value)  # Writes the data to the node.
         # If the replication strategy is 'consistent', writes to the appropriate node based on the key's hash.
         elif self.strategy == 'consistent':
-            node = self.consistent_hash.get_node(key)
-            print(f'Writing to node: {node.node_id}')
-            if node and node.is_alive():
-                node.write(key, value)
+            nodes = self.consistent_hash.get_nodes_for_key(key)
+            for node in nodes:
+                if node.is_alive():
+                   node.write(key, value)
 
     def read_from_replicas(self, key):
         # Reads the value associated with a key from active replica nodes.
