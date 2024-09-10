@@ -221,7 +221,7 @@ if __name__ == "__main__":
     while True:
         # Print the available options to the user
         print("\nOptions:")
-        print("1. Set replication strategy and replication factor (default: full)")
+        print("1. Set replication strategy consistent/full (default: full)")
         print("2. Write key-value")
         print("3. Read value by key")
         print("4. Delete key-value")
