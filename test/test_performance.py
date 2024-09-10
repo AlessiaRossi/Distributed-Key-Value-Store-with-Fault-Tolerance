@@ -4,6 +4,10 @@ from app.models import ReplicationManager
 
 # Test performance
 class TestPerformance(unittest.TestCase):
+    def __init__(self, methodName: str = "runTest"):
+        super().__init__(methodName)
+        self.replication_manager = None
+
     def setUp(self):
         self.replication_manager_full = ReplicationManager(replication_factor=3, strategy='full')
         self.replication_manager_consistent = ReplicationManager(replication_factor=3, strategy='consistent')
