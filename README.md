@@ -5,33 +5,64 @@ To read the README.md in Italian, click [here](README_ita.md)
 ## Index
 
 1. [Overview](#1-overview)
-   - [Project Structure](./myLib/Project_Structure.md)
+   - [Key Features](#key-features)
 2. [Enviroment setup](#2-enviroment-setup)
-3. [Installation](#2-installation)
+3. [Installation](#3-installation)
 4. [Running the Application](#4-running-the-application)
 5. [API Endpoints](#5-api-endpoints)
+6. [Project Architecture](#6-project-architecture)
+7. [Performance Testing](#7-performance-testing)
+8. [Report](#8-report)
+9. [Conclusion](#9-conclusion)
 
 ## **1. Overview**
 
 This project implements a distributed key-value store with fault tolerance using replication. The system allows users to specify a replication factor and handles server failures and recoveries.
-- ### Project Structure
-Refer to the [project structure.md](design_document.md) for the system architecture, consistency model, and fault tolerance strategies.
+
+### Key Features:
+- **Fault Tolerance**: This system ensures that data remains accessible even when individual nodes fail.
+- **Data Distribution**: Data is replicated across multiple nodes to guarantee availability.
+- **Consistency**: Mechanisms in place prevent data discrepancies between nodes.
+- **Scalability**: New nodes can be easily added to expand the system’s capacity.
+- **CRUD Operations**: The system supports basic operations like creating, reading, updating, and deleting data.
 
 ## **2. Enviroment setup**
+
 Before running the code, it's important to take some precautions and set up your environment properly. Follow these steps:
+
 1. Create a Virtual Environment:
    - Open your terminal or command prompt.
-   - Run the following command to create a virtual environment named "venv":` python -m venv venv`
+   - Run the following command to create a virtual environment named "venv":
+   ```bash
+   python -m venv venv
+   ```
+
 2. Activate the Virtual Environment:
-   - If you're using Windows:    `.
-env\Scripts ctivate`
-   - If you're using Unix or MacOS:    `source ./venv/Scripts/activate`
+   - If you're using Windows:
+   ```bash
+   .\venv\Scripts\activate
+   ```
+   - If you're using Unix or MacOS:
+   ```bash
+   source ./venv/Scripts/activate
+   ```
+
 3. Deactivate the Environment (When Finished):
-   - Use the following command to deactivate the virtual environment:    `deactivate`
+   - Use the following command to deactivate the virtual environment:
+   ```bash
+   deactivate
+   ```
+
 4. Install Dependencies:
-   - After cloning the project and activating the virtual environment, install the required dependencies using:    `pip install -r requirements.txt`
-     This command downloads all the non-standard modules required by the application.
-5. If your Python version used to generate the virtual environment doesn't contain an updated version of pip, update pip using:  `pip install --upgrade pip `
+   - After cloning the project and activating the virtual environment, install the required dependencies using:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+5. If your Python version used to generate the virtual environment doesn't contain an updated version of pip, update pip using:
+   ```bash
+   pip install --upgrade pip
+   ```
 
 ### Requirements
 
@@ -42,36 +73,38 @@ env\Scripts ctivate`
 ## **3. Installation**
 
 1. Clone the repository:
-    ```sh
-    git clone https://github.com/AlessiaRossi/Teleassistance-Supervised-Clustering.git
-    cd Distributed-Key-Value-Store-with-Fault-Tolerance
-    ```
+
+```bash
+git clone https://github.com/AlessiaRossi/Distributed-Key-Value-Store-with-Fault-Tolerance.git
+cd Distributed-Key-Value-Store-with-Fault-Tolerance
+```
 
 2. Install dependencies:
-    ```sh
-    pip install -r requirements.txt
-    ```
+
+```bash
+pip install -r requirements.txt
+```
 
 ## **4. Running the Application**
 
 1. Start the Flask application:
-    ```sh
-    python run.py
-    ```
+```bash
+python run.py
+```
 
 2. The application will be available at `http://127.0.0.1:5000`.
 
 3. Use the command-line interface (CLI) to interact with the application:
-    ```sh
-    python client.py
-    ```
+```bash
+python client.py
+```
 
 4. Follow the on-screen options to perform various operations such as setting replication strategy, writing key-value pairs, reading values, deleting key-value pairs, failing nodes, recovering nodes, and demonstrating fail-recover behavior.
 
 5. Run the test suite:
-    ```sh
-    python -m unittest discover -s tests
-    ```
+```bash
+python -m unittest discover -s tests
+```
 
 ## **5. API Endpoints**
 
@@ -82,19 +115,11 @@ env\Scripts ctivate`
 - `POST /recover/<int:node_id>`: Recover a failed node.
 - `GET /nodes`: Get the status of all nodes.
 
-## Report
-
-Refer to the [report.md](report.md) for experimental results and analysis.
-
 ---
 
-### Features Overview
+## **6. Project Architecture**
 
-- **Fault Tolerance**: This system ensures that data remains accessible even when individual nodes fail. 
-- **Data Distribution**: Data is replicated across multiple nodes to guarantee availability.
-- **Consistency**: Mechanisms in place prevent data discrepancies between nodes.
-- **Scalability**: New nodes can be easily added to expand the system’s capacity.
-- **CRUD Operations**: The system supports basic operations like creating, reading, updating, and deleting data.
+The system operates using a distributed architecture where the data is replicated and stored across multiple nodes, ensuring redundancy and fault tolerance. Each node is designed to handle key-value pairs and can recover its state after a failure by syncing with other active nodes.
 
 ### ReplicaNode and ReplicationManager
 
@@ -119,7 +144,7 @@ This component is responsible for managing the replication strategy across multi
   
 ---
 
-### Performance Testing
+## **7. Performance Testing**
 
 This project includes performance tests that measure the effectiveness of the system under different replication strategies. The tests evaluate key metrics, such as the time taken for write, read, fail, and recover operations.
 
@@ -141,12 +166,12 @@ Refer to the [report.md](report.md) for the results and in-depth analysis of the
 
 ---
 
-### Project Architecture
+## **8. Report**
 
-The system operates using a distributed architecture where the data is replicated and stored across multiple nodes, ensuring redundancy and fault tolerance. Each node is designed to handle key-value pairs and can recover its state after a failure by syncing with other active nodes.
+Refer to the [report.md](report.md) for experimental results and analysis.
 
 ---
 
-### Conclusion
+## **9. Conclusion**
 
 This distributed key-value store provides a robust solution for maintaining high data availability even during node failures. It leverages advanced replication strategies like consistent hashing to balance load and improve scalability. With flexible fault tolerance mechanisms, this project offers a reliable foundation for distributed systems.
