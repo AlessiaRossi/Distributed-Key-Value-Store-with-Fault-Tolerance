@@ -39,7 +39,7 @@ class TestPerformance(unittest.TestCase):
         print(f'Fail nodes performance (full): {end_time - start_time} seconds')
         start_time = time.time()
         for node_id in range(3):
-            self.replication_manager.recover_node(node_id)
+            self.replication_manager_full.recover_node(node_id)
         end_time = time.time()
         print(f'Recover nodes performance (full): {end_time - start_time} seconds')
 

@@ -34,8 +34,7 @@ This directory contains the main application code, including initialization, rou
 - **`model.py`**: Contains the data models and business logic for the key-value store.
 - **`consistent_hash.py`**: This subdirectory contains the implementation of the consistent hashing algorithm used for data distribution.
 ### `test/`
-This directory contains the test cases for the application.  
-- **`db/-`**: Contains test databases used during testing.
+This directory contains the test cases for the application.
 - **`test_fault_tolerance.py`**: Contains test cases to verify the fault tolerance capabilities of the system.
 - **`test_performance.py`**: Contains test cases to measure the performance of the system under different conditions.
 ### `db/`
