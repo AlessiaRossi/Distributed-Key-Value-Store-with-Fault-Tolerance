@@ -13,9 +13,7 @@ Distributed-Key-Value-Store-with-Fault-Tolerance/
 │   ├── routes.py  
 │   ├── models.py 
     ├── consistent_hash.py
-├── tests/  
-│   ├── db/
-│   ├── test_fault_tolerance.py  
+├── tests/   
 │   ├── test_performance.py   
 ├── db/
 │   ├── replica_0.db
@@ -35,7 +33,6 @@ This directory contains the main application code, including initialization, rou
 - **`consistent_hash.py`**: This subdirectory contains the implementation of the consistent hashing algorithm used for data distribution.
 ### `test/`
 This directory contains the test cases for the application.
-- **`test_fault_tolerance.py`**: Contains test cases to verify the fault tolerance capabilities of the system.
 - **`test_performance.py`**: Contains test cases to measure the performance of the system under different conditions.
 ### `db/`
 This directory contains the database files for the replicas.  
