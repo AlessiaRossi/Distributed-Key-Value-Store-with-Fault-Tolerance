@@ -124,7 +124,7 @@ class DistributedKVClient:
                         all_alive = False
                         self.recover_node(node['node_id'])
                 if all_alive:
-                    print(f"Success: 200, Status: success, Message: All nodes are already alive")
+                    print(f"Operation successful: all nodes are already active.")
             else:
                 self.handle_response(response)
         except requests.RequestException as e:
@@ -140,19 +140,19 @@ class DistributedKVClient:
                 value = data.get('value', '')
                 nodes = data.get('nodes', [])
                 if value:
-                    print(f"Success: {response.status_code}, Status: {status}, Message: {message}, Value: {value}")
+                    print(f"Status Update: {message}, Value: {value}")
                 elif nodes:
-                    print(f"Success: {response.status_code}, Status: {status}")
+                    print(f" Status: {status}")
                     for node in nodes:
                         print(f"Node ID: {node['node_id']}, Status: {node['status']}, Port: {node['port']}")
                 else:
-                    print(f"Success: {response.status_code}, Status: {status}, Message: {message}")
+                    print(f"Status Update: {message}")
             else:
                 error_message = data.get('error', 'Unknown error')
                 detailed_message = data.get('message', 'No detailed message provided')
-                print(f"Failed: {response.status_code}, Error: {error_message}, Message: {detailed_message}")
+                print(f"Error: {error_message}, Status Update: {detailed_message}")
         except ValueError:
-            print(f"Failed: {response.status_code}, Response: {response.text}")
+            print(f"Response: {response.text}")
 
 
 
