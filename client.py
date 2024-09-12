@@ -111,6 +111,20 @@ class DistributedKVClient:
         except requests.RequestException as e:
             print(f"Request failed: {e}")
 
+    def get_number_of_nodes(self):
+        url = f"{self.base_url}/nodes"
+        try:
+            response = requests.get(url, headers=self.headers)
+            if response.status_code == 200:
+                nodes = response.json().get('nodes', [])
+                return len(nodes)
+            else:
+                self.handle_response(response)
+                return 0
+        except requests.RequestException as e:
+            print(f"Request failed: {e}")
+            return 0
+
     # Method to recover all nodes
     def recover_all_nodes(self):
         url = f"{self.base_url}/nodes"
@@ -213,11 +227,18 @@ if __name__ == "__main__":
     # Create an instance of the DistributedKVClient with the base URL and API token
     client = DistributedKVClient(base_url, api_token)
 
+    number_of_nodes = client.get_number_of_nodes()
+
+    strategy = None
+
     # Infinite loop to display options and perform corresponding actions based on user input
     while True:
         # Print the available options to the user
         print("\nOptions:")
-        print("1. Set replication strategy consistent/full (default: full)")
+        if strategy is None:
+            print("1. Set replication strategy consistent/full (default: full)")
+        else:
+            print(f"1. Set replication strategy consistent/full (actived: {strategy})")
         print("2. Write key-value")
         print("3. Read value by key")
         print("4. Delete key-value")
@@ -238,9 +259,21 @@ if __name__ == "__main__":
             strategy = input("Enter strategy (full/consistent): ")
             replication_factor = None
             if strategy == 'consistent':
-                replication_factor = int(input("Enter replication factor (<3): "))
-            print(f"Stai usando la strategy {strategy}.")  # Stampa il messaggio con la strategia scelta
-            client.set_replication_strategy(strategy, replication_factor)
+                while True:
+                    replication_factor = int(input(f"Enter replication factor (<{number_of_nodes}): "))
+                    if replication_factor < number_of_nodes:
+                        break
+                    else:
+                        change_to_full = input("Replication factor must be less than the number of nodes.\nDo you want to switch to 'full' strategy? (yes/no): ").strip().lower()
+                        if change_to_full == 'yes':
+                            strategy = 'full'
+                            replication_factor = None
+                            break
+            if strategy in ['consistent', 'full']:
+                client.set_replication_strategy(strategy, replication_factor)
+            else:
+                strategy = None
+                print("Invalid strategy. Please try again.")
 
         elif choice == '2':
             # Option to write a key-value pair
