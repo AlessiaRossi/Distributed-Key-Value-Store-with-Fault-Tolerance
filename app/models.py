@@ -70,11 +70,12 @@ class ReplicaNode:
         # Simulates the failure of the node by setting its state to inactive.
         self.alive = False
 
-    def recover(self, active_nodes):
+    def recover(self, active_nodes, strategy='full'):
         # Recovers the node and synchronizes data with other active nodes.
         if not self.alive:
             self.alive = True  # Sets the node's state to active.
-            self.sync_with_active_nodes(active_nodes)  # Synchronizes with other active nodes.
+            if strategy == 'full':
+                self.sync_with_active_nodes(active_nodes)  # Synchronizes with other active nodes.
 
     def is_alive(self):
         # Returns the current state of the node.
@@ -170,7 +171,7 @@ class ReplicationManager:
     def recover_node(self, node_id):
         # Recovers a specific node and synchronizes data with other active nodes.
         if 0 <= node_id < len(self.nodes):  # Checks if the node ID is valid.
-            self.nodes[node_id].recover(self.nodes)  # Calls the recover method of the node.
+            self.nodes[node_id].recover(self.nodes, self.strategy)  # Calls the recover method of the node.
 
     def get_nodes_status(self):
         # Returns the status of all nodes in a list of dictionaries.
