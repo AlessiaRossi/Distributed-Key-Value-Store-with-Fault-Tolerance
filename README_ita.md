@@ -37,45 +37,45 @@ Questo progetto implementa un **Distributed Key-Value Store** con **Fault Tolera
 
    Vediamo le funzionalità principali delle due classi, `ReplicaNode` e `ReplicationManager`, che costituiscono il nucleo del sistema:
 
-    **ReplicaNode**
+   **ReplicaNode**:
 
-      Ogni `ReplicaNode` rappresenta un singolo nodo nel sistema distribuito, con un database SQLite locale per archiviare coppie chiave-valore. I nodi supportano:
-      - Scrittura e lettura di coppie chiave-valore
-      - Simulazione di guasti e ripristino
-      - Sincronizzazione dei dati con altri nodi attivi durante il ripristino
+   Ogni `ReplicaNode` rappresenta un singolo nodo nel sistema distribuito, con un database SQLite locale per archiviare coppie chiave-valore. I nodi supportano:
+   - Scrittura e lettura di coppie chiave-valore
+   - Simulazione di guasti e ripristino
+   - Sincronizzazione dei dati con altri nodi attivi durante il ripristino
 
-    **ReplicationManager**
+   **ReplicationManager**:
 
-      `ReplicationManager` gestisce la strategia di replica su più nodi. Supporta:
-      - Scrittura su e lettura da tutti i nodi (replica completa) o nodi specifici (hashing coerente)
-      - Simulazione di guasti e ripristino dei nodi
-      - Garanzia di coerenza dei dati tra i nodi attivi
+   `ReplicationManager` gestisce la strategia di replica su più nodi. Supporta:
+   - Scrittura su e lettura da tutti i nodi (replica completa) o nodi specifici (hashing coerente)
+   - Simulazione di guasti e ripristino dei nodi
+   - Garanzia di coerenza dei dati tra i nodi attivi
 
    #### `routes.py`
-    Il modulo si articola con:
+   Il modulo si articola con:
 
-     1. **Autenticazione API**: Ogni richiesta deve includere un token API valido nell'header `Authorization` per essere autorizzata. Se il token è invalido, la richiesta viene respinta.
+   1. **Autenticazione API**: Ogni richiesta deve includere un token API valido nell'header `Authorization` per essere autorizzata. Se il token è invalido, la richiesta viene respinta.
 
-     2. **Scrittura di Dati** (`/write` - POST): Consente di scrivere una coppia chiave-valore nel sistema distribuito, replicando i dati sui nodi attivi.
+   2. **Scrittura di Dati** (`/write` - POST): Consente di scrivere una coppia chiave-valore nel sistema distribuito, replicando i dati sui nodi attivi.
 
-     3. **Lettura di Dati** (`/read/<key>` - GET): Consente di leggere il valore associato a una chiave specifica dai nodi attivi.
+   3. **Lettura di Dati** (`/read/<key>` - GET): Consente di leggere il valore associato a una chiave specifica dai nodi attivi.
 
-     4. **Cancellazione di Dati** (`/delete/<key>` - DELETE): Permette di eliminare una chiave e il relativo valore dal sistema distribuito.
+   4. **Cancellazione di Dati** (`/delete/<key>` - DELETE): Permette di eliminare una chiave e il relativo valore dal sistema distribuito.
 
-     5. **Simulazione di Fallimento Nodo** (`/fail/<int:node_id>` - POST): Simula il fallimento di un nodo specifico per testare la tolleranza ai guasti del sistema.
+   5. **Simulazione di Fallimento Nodo** (`/fail/<int:node_id>` - POST): Simula il fallimento di un nodo specifico per testare la tolleranza ai guasti del sistema.
 
-     6. **Recupero Nodo** (`/recover/<int:node_id>` - POST): Recupera un nodo fallito e lo sincronizza con i nodi attivi.
+   6. **Recupero Nodo** (`/recover/<int:node_id>` - POST): Recupera un nodo fallito e lo sincronizza con i nodi attivi.
 
-     7. **Visualizzazione Stato Nodi** (`/nodes` - GET): Restituisce lo stato attuale (attivo/inattivo) di tutti i nodi nel sistema.
+   7. **Visualizzazione Stato Nodi** (`/nodes` - GET): Restituisce lo stato attuale (attivo/inattivo) di tutti i nodi nel sistema.
 
-     8. **Impostazione della Strategia di Replica** (`/set_replication_strategy` - POST): Consente di impostare la strategia di replica del sistema (replica completa o hashing consistente).
+   8. **Impostazione della Strategia di Replica** (`/set_replication_strategy` - POST): Consente di impostare la strategia di replica del sistema (replica completa o hashing consistente).
 
-     9. **Recupero dei Nodi per una Chiave** (`/nodes_for_key/<key>` - GET): Restituisce i nodi responsabili di una chiave specifica (solo per l'hashing consistente).
+   9. **Recupero dei Nodi per una Chiave** (`/nodes_for_key/<key>` - GET): Restituisce i nodi responsabili di una chiave specifica (solo per l'hashing consistente).
 
-     Struttura Generale:
-     - **API Token**: Verifica il token di autenticazione nelle richieste.
-     - **Manager di Replica**: Ogni operazione viene gestita dal `ReplicationManager` che coordina la replicazione dei dati e la tolleranza ai guasti.
-     - **Risposte dell'API**: Tutte le risposte sono strutturate in formato JSON con un messaggio di successo o errore.
+   Struttura Generale:
+   - **API Token**: Verifica il token di autenticazione nelle richieste.
+   - **Manager di Replica**: Ogni operazione viene gestita dal `ReplicationManager` che coordina la replicazione dei dati e la tolleranza ai guasti.
+   - **Risposte dell'API**: Tutte le risposte sono strutturate in formato JSON con un messaggio di successo o errore.
 
 #### 2. **`tests`**
    - **Funzione**: Questa cartella contiene i test unitari che verificano il corretto funzionamento delle varie componenti del sistema, inclusi i test di replicazione, lettura/scrittura e gestione dei guasti.
@@ -87,23 +87,23 @@ Questo progetto implementa un **Distributed Key-Value Store** con **Fault Tolera
    - **Funzione**: Modulo che si occupa delle interazioni con il **database**, comprese la connessione, l'esecuzione delle query, e la gestione delle transazioni. Questo modulo è centrale per tutte le operazioni di lettura e scrittura nel database sottostante. Questa sezione definisce un client per interagire con un sistema distribuito di archiviazione chiave-valore (Distributed Key-Value Store). Ecco le principali funzionalità del client:
 
    1. **Inizializzazione**: 
-    - Il client viene inizializzato con l'URL del server e un token API per autenticazione.
+   - Il client viene inizializzato con l'URL del server e un token API per autenticazione.
    
    2. **Funzioni di scrittura e lettura**: 
-    - `write(key, value)`: Scrive una coppia chiave-valore nel sistema distribuito.
-    - `read(key)`: Legge il valore associato a una chiave specifica.
+   - `write(key, value)`: Scrive una coppia chiave-valore nel sistema distribuito.
+   - `read(key)`: Legge il valore associato a una chiave specifica.
 
    3. **Funzioni di cancellazione e verifica nodo**:
-    - `delete(key)`: Cancella una coppia chiave-valore.
-    - `fail_node(node_id)`: Simula il fallimento di un nodo specifico.
-    - `recover_node(node_id)`: Recupera un nodo specifico.
+   - `delete(key)`: Cancella una coppia chiave-valore.
+   - `fail_node(node_id)`: Simula il fallimento di un nodo specifico.
+   - `recover_node(node_id)`: Recupera un nodo specifico.
 
    4. **Funzioni di gestione della replica**:
-    - `set_replication_strategy(strategy, replication_factor)`: Imposta la strategia di replica (es. full o consistent).
-    - `get_nodes()`: Recupera lo stato di tutti i nodi nel sistema.
+   - `set_replication_strategy(strategy, replication_factor)`: Imposta la strategia di replica (es. full o consistent).
+   - `get_nodes()`: Recupera lo stato di tutti i nodi nel sistema.
 
    5. **Dimostrazione di fail-recover**: 
-    - `demonstrate_fail_recover_behavior()`: Mostra come il sistema gestisce il fallimento e il recupero di nodi.
+   - `demonstrate_fail_recover_behavior()`: Mostra come il sistema gestisce il fallimento e il recupero di nodi.
 
    L'interfaccia consente di eseguire queste azioni attraverso un menu a scelta, facilitando l'interazione con il sistema distribuito.
 
