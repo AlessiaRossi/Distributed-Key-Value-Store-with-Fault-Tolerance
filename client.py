@@ -45,7 +45,6 @@ class DistributedKVClient:
             print(f"Request failed: {e}")
 
     # Method to write a key and value to the server
-      # Send a POST request to the server with the key and value
     def write(self, key, value, strategy='full', replication_factor=None):
         if not self.validate_key(key) or not self.validate_value(value):
             return
@@ -60,7 +59,6 @@ class DistributedKVClient:
             print(f"Request failed: {e}")
 
     # Method to read the value associated with a key
-      # Send a GET request to the server
     def read(self, key):
         if not self.validate_key(key):
             return
@@ -72,7 +70,6 @@ class DistributedKVClient:
             print(f"Request failed: {e}")
 
     # Method to delete a value associated with a key
-      # Send a DELETE request to the server
     def delete(self, key):
         if not self.validate_key(key):
             return
@@ -84,7 +81,6 @@ class DistributedKVClient:
             print(f"Request failed: {e}")
 
     # Method for node failure
-      # Send a POST request to the server to mark a node as failed
     def fail_node(self, node_id):
         if not self.validate_node_id(node_id):
             return
@@ -96,7 +92,6 @@ class DistributedKVClient:
             print(f"Request failed: {e}")
 
     # Method for node recovery
-      # Send a POST request to the server to recover a failed node
     def recover_node(self, node_id):
         if not self.validate_node_id(node_id):
             return
@@ -108,7 +103,6 @@ class DistributedKVClient:
             print(f"Request failed: {e}")
 
     # Method to get the status of all nodes
-      # Send a GET request to the server to get the status of all nodes
     def get_nodes(self):
         url = f"{self.base_url}/nodes"
         try:
@@ -118,7 +112,6 @@ class DistributedKVClient:
             print(f"Request failed: {e}")
 
     # Method to recover all nodes
-      # Send a POST request to the server to recover all failed nodes
     def recover_all_nodes(self):
         url = f"{self.base_url}/nodes"
         try:
@@ -160,6 +153,9 @@ class DistributedKVClient:
                 print(f"Failed: {response.status_code}, Error: {error_message}, Message: {detailed_message}")
         except ValueError:
             print(f"Failed: {response.status_code}, Response: {response.text}")
+
+
+
 
 # Method for demonstrate the behavior of a distributed key-value store system in scenarios of node failure and
 # recovery
@@ -243,6 +239,7 @@ if __name__ == "__main__":
             replication_factor = None
             if strategy == 'consistent':
                 replication_factor = int(input("Enter replication factor (<3): "))
+            print(f"Stai usando la strategy {strategy}.")  # Stampa il messaggio con la strategia scelta
             client.set_replication_strategy(strategy, replication_factor)
 
         elif choice == '2':
@@ -289,4 +286,3 @@ if __name__ == "__main__":
         else:
             # Handle invalid choices
             print("Invalid choice. Please try again.")
-
