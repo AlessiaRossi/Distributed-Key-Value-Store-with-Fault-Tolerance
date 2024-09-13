@@ -83,6 +83,7 @@ class ReplicaNode:
 
     def sync_with_active_nodes(self, active_nodes):
         # Synchronizes the node's data with other active nodes.
+        all_keys = set()  # Initializes a set to store all keys.
         for node in active_nodes:
             if node.is_alive() and node.node_id != self.node_id:
                 conn = sqlite3.connect(node.db_path)  # Connects to the other node's database.
@@ -92,6 +93,20 @@ class ReplicaNode:
                 conn.close()  # Closes the connection to the database.
                 for key, value in rows:
                     self.write(key, value)  # Writes each key-value pair to the current node's database.
+                    all_keys.add(key)  # Adds the key to the set of all keys.
+
+        # Retrieve all keys from self.
+        # si connette al nodo ricoverato e recupera tutte le chiavi al suo interno ,
+        conn = sqlite3.connect(self.db_path)  # Connects to the current node's database.
+        cursor = conn.cursor()  # Creates a cursor to execute SQL commands.
+        cursor.execute('''SELECT key FROM kv_store''')  # Selects all keys.
+        self_keys = cursor.fetchall()  # Retrieves all keys.
+        conn.close()  # Closes the connection to the database.
+
+        # Remove keys from self that are not present in other active nodes.
+        for (key,) in self_keys:
+            if key not in all_keys:
+                self.delete(key)  # Deletes the key from the current node's database.
 
 class ReplicationManager:
     def __init__(self, replication_factor=3, strategy='full'):
