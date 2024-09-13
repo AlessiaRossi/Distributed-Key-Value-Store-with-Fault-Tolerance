@@ -156,7 +156,7 @@ class DistributedKVClient:
                 if value:
                     print(f"Status Update: {message}, Value: {value}")
                 elif nodes:
-                    print(f" Status: {status}")
+                    print(f"Status: {status}")
                     for node in nodes:
                         print(f"Node ID: {node['node_id']}, Status: {node['status']}, Port: {node['port']}")
                 else:
