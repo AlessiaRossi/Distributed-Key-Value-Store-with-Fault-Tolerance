@@ -1,11 +1,50 @@
 from flask import request, jsonify
 from functools import wraps
 from .models import ReplicationManager
+import json
+import os
 
-API_TOKEN = "your_api_token_here"  # Replace with a secure token
+# Function to load configuration values from a JSON file
+def load_config(file_path, default_config=None):
+    if default_config is None:
+        default_config = {
+            "replication_factor": 3,  # Default replication factor
+            "API_TOKEN": "your_api_token_here"  # Default API token (replace with a secure value)
+        }
+    
+    # If the file doesn't exist, create the directory and file with default values
+    if not os.path.exists(file_path):
+        dir_name = os.path.dirname(file_path)
+        # Create the directory if it doesn't exist
+        if not os.path.exists(dir_name) and dir_name != '':
+            os.makedirs(dir_name)
+        # Write the default values into the JSON file
+        with open(file_path, 'w') as f:
+            json.dump(default_config, f)
+        return default_config
+    
+    # If the file exists, load the values from the JSON file
+    try:
+        with open(file_path, 'r') as f:
+            data = json.load(f)
+            # Return the merged configuration (file + defaults for missing values)
+            return {**default_config, **data}
+    except (json.JSONDecodeError, KeyError):
+        # If the JSON file is corrupted or doesn't contain the correct values, return the default config
+        return default_config
 
-# Initialize the replication manager with a replication factor of 3
-replication_manager = ReplicationManager(replication_factor=3)
+# Path to the JSON configuration file
+file_path = 'config/config.json'
+
+# Load the entire configuration (replication factor and API token)
+config = load_config(file_path)
+
+# Extract specific values from the configuration
+replication_factor = config.get('replication_factor')
+API_TOKEN = config.get('API_TOKEN')
+
+# Initialize the replication manager with the replication factor from the file
+replication_manager = ReplicationManager(replication_factor=replication_factor)
 
 # Decorator to require a valid API token
 def require_api_token(f):

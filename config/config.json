@@ -1,0 +1,4 @@
+{
+    "replication_factor": 3,
+    "API_TOKEN": "your_api_token_here"
+}
