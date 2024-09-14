@@ -209,9 +209,14 @@ class ReplicationManager:
                 self.consistent_hash.redistribute_keys(node)
 
     def recover_node(self, node_id):
-        # Recovers a specific node and synchronizes data with other active nodes.
-        if 0 <= node_id < len(self.nodes):  # Checks if the node ID is valid.
-            self.nodes[node_id].recover(self.nodes, self.strategy)  # Calls the recover method of the node.
+        """Recupera un nodo e ripristina le sue chiavi, eliminando le chiavi dal nodo ospitante."""
+        if 0 <= node_id < len(self.nodes):
+            node = self.nodes[node_id]
+            node.recover(self.nodes, self.strategy)  # Recupera lo stato del nodo
+            if self.strategy == 'consistent':
+                print(f"Recovering node {node_id}...")
+                self.consistent_hash.recover_node(node)  # Recupera le chiavi nel nodo consistent hash
+
 
     def get_nodes_status(self):
         # Returns the status of all nodes in a list of dictionaries.
