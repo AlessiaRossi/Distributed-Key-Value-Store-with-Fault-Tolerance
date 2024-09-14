@@ -11,7 +11,7 @@ class ReplicaNode:
         self.name_db = f'replica_{node_id}.db'  # Name of the database file for this node.
         self.db_path = os.path.join('db', self.name_db)  # Path to the database file for this node.
         self.alive = True  # Initial state of the node is active.
-        self.create_db_directory() # Creates the 'db' directory if it does not exist.
+        self.create_db_directory()  # Creates the 'db' directory if it does not exist.
         self._initialize_db()  # Initializes the database if it does not exist.
 
     def create_db_directory(self):
@@ -24,7 +24,8 @@ class ReplicaNode:
         if not os.path.exists(self.db_path):
             conn = sqlite3.connect(self.db_path)  # Connects to the database.
             cursor = conn.cursor()  # Creates a cursor to execute SQL commands.
-            cursor.execute('''CREATE TABLE IF NOT EXISTS kv_store (key TEXT PRIMARY KEY, value TEXT)''')  # Creates the table.
+            cursor.execute(
+                '''CREATE TABLE IF NOT EXISTS kv_store (key TEXT PRIMARY KEY, value TEXT)''')  # Creates the table.
             conn.commit()  # Commits the changes to the database.
             conn.close()  # Closes the connection to the database.
 
@@ -33,7 +34,8 @@ class ReplicaNode:
         if self.alive:
             conn = sqlite3.connect(self.db_path)  # Connects to the database.
             cursor = conn.cursor()  # Creates a cursor to execute SQL commands.
-            cursor.execute('''INSERT OR REPLACE INTO kv_store (key, value) VALUES (?, ?)''', (key, value))  # Inserts or updates the data.
+            cursor.execute('''INSERT OR REPLACE INTO kv_store (key, value) VALUES (?, ?)''',
+                           (key, value))  # Inserts or updates the data.
             conn.commit()  # Commits the changes to the database.
             conn.close()  # Closes the connection to the database.
 
@@ -130,6 +132,7 @@ class ReplicaNode:
         conn.close()
         return rows
 
+
 class ReplicationManager:
     def __init__(self, replication_factor=3, strategy='full'):
         # Initializes the replication manager with a specified replication factor.
@@ -142,8 +145,6 @@ class ReplicationManager:
         if strategy == 'consistent':
             self.consistent_hash = ConsistentHash(self.nodes, replicas=self.replication_factor)
             print(f'ReplicationManager: consistent_hash={self.consistent_hash}')
-
-
 
     def set_replication_strategy(self, strategy, replication_factor=None):
         self.strategy = strategy
@@ -216,7 +217,6 @@ class ReplicationManager:
             if self.strategy == 'consistent':
                 print(f"Recovering node {node_id}...")
                 self.consistent_hash.recover_node(node)  # Recupera le chiavi nel nodo consistent hash
-
 
     def get_nodes_status(self):
         # Returns the status of all nodes in a list of dictionaries.
