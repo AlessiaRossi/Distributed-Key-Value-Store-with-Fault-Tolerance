@@ -1,6 +1,7 @@
 import hashlib
 import bisect
 
+
 class ConsistentHash:
     def __init__(self, nodes=None, replicas=3):
         self.replicas = replicas
@@ -28,6 +29,7 @@ class ConsistentHash:
             key = self._hash(f'{node.node_id}:{i}')
             del self.ring[key]
             self.sorted_keys.remove(key)
+        self._redistribute_keys(node)
 
     # Get the node responsible for the given key
     def get_node(self, key):
@@ -52,3 +54,23 @@ class ConsistentHash:
             nodes.append(self.ring[self.sorted_keys[idx]])
             idx += 1
         return nodes
+
+    def get_next_node(self, key):
+        if not self.ring:
+            return None
+        hash_key = self._hash(key)
+        idx = bisect.bisect(self.sorted_keys, hash_key)
+        if idx == len(self.sorted_keys):
+            idx = 0
+        next_idx = (idx + 1) % len(self.sorted_keys)
+        return self.ring[self.sorted_keys[next_idx]]
+
+    def redistribute_keys(self, node):
+        self._redistribute_keys(node)
+
+    def _redistribute_keys(self, node):
+        for i in range(self.replicas):
+            next_node = self.get_next_node(f'{node.node_id}:{i}')
+            if next_node:
+                for key, value in node.get_all_keys():
+                    next_node.write(key, value)

@@ -76,6 +76,8 @@ class ReplicaNode:
             self.alive = True  # Sets the node's state to active.
             if strategy == 'full':
                 self.sync_with_active_nodes(active_nodes)  # Synchronizes with other active nodes.
+            elif strategy == 'consistent':
+                self._remove_duplicate_keys(active_nodes)
 
     def is_alive(self):
         # Returns the current state of the node.
@@ -107,6 +109,26 @@ class ReplicaNode:
         for (key,) in self_keys:
             if key not in all_keys:
                 self.delete(key)  # Deletes the key from the current node's database.
+
+    def _remove_duplicate_keys(self, active_nodes):
+        for node in active_nodes:
+            if node.is_alive() and node.node_id != self.node_id:
+                conn = sqlite3.connect(node.db_path)
+                cursor = conn.cursor()
+                cursor.execute('''SELECT key FROM kv_store''')
+                rows = cursor.fetchall()
+                conn.close()
+                for (key,) in rows:
+                    if self.key_exists(key):
+                        self.delete(key)
+
+    def get_all_keys(self):
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute('''SELECT key, value FROM kv_store''')
+        rows = cursor.fetchall()
+        conn.close()
+        return rows
 
 class ReplicationManager:
     def __init__(self, replication_factor=3, strategy='full'):
@@ -146,7 +168,7 @@ class ReplicationManager:
             nodes = self.consistent_hash.get_nodes_for_key(key)
             for node in nodes:
                 if node.is_alive():
-                   node.write(key, value)
+                    node.write(key, value)
 
     def read_from_replicas(self, key):
         # Reads the value associated with a key from active replica nodes.
@@ -181,7 +203,10 @@ class ReplicationManager:
     def fail_node(self, node_id):
         # Simulates the failure of a specific node identified by node_id.
         if 0 <= node_id < len(self.nodes):  # Checks if the node ID is valid.
-            self.nodes[node_id].fail()  # Calls the fail method of the node.
+            node = self.nodes[node_id]
+            node.fail()
+            if self.strategy == 'consistent':
+                self.consistent_hash.redistribute_keys(node)
 
     def recover_node(self, node_id):
         # Recovers a specific node and synchronizes data with other active nodes.
