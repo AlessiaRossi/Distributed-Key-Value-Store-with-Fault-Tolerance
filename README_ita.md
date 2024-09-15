@@ -240,5 +240,5 @@ pip install -r requirements.txt
 Esegui i test unitari:
 
 ```bash
-python -m unittest discover -s tests
+python -m unittest test_performance.py
 ```
