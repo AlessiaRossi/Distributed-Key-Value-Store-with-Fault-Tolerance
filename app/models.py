@@ -78,8 +78,6 @@ class ReplicaNode:
             self.alive = True  # Sets the node's state to active.
             if strategy == 'full':
                 self.sync_with_active_nodes(active_nodes)  # Synchronizes with other active nodes.
-            elif strategy == 'consistent':
-                self._remove_duplicate_keys(active_nodes)
 
     def is_alive(self):
         # Returns the current state of the node.
@@ -111,18 +109,6 @@ class ReplicaNode:
         for (key,) in self_keys:
             if key not in all_keys:
                 self.delete(key)  # Deletes the key from the current node's database.
-
-    def _remove_duplicate_keys(self, active_nodes):
-        for node in active_nodes:
-            if node.is_alive() and node.node_id != self.node_id:
-                conn = sqlite3.connect(node.db_path)
-                cursor = conn.cursor()
-                cursor.execute('''SELECT key FROM kv_store''')
-                rows = cursor.fetchall()
-                conn.close()
-                for (key,) in rows:
-                    if self.key_exists(key):
-                        self.delete(key)
 
     def get_all_keys(self):
         conn = sqlite3.connect(self.db_path)

@@ -81,19 +81,27 @@ class ConsistentHash:
         if next_node:
             print(f"Redistribuzione delle chiavi del nodo {node.node_id} al nodo {next_node.node_id}")
             for key, value in node.get_all_keys():  # Recupera tutte le chiavi dal nodo fallito
-                next_node.write(key, value)  # Scrivi le chiavi nel nuovo nodo
-                self.temp_key_storage[key] = (next_node.node_id, value)  # Traccia le chiavi spostate con valore
+                # Controlla se il nodo successivo ha già la chiave
+                if not next_node.key_exists(key):
+                    # Se la chiave non esiste nel nodo successivo, spostala
+                    next_node.write(key, value)  # Scrivi la chiave nel nuovo nodo
+                    self.temp_key_storage[key] = (next_node.node_id, value)  # Traccia la chiave spostata con il valore
+                else:
+                    print(f"La chiave '{key}' esiste già nel nodo {next_node.node_id}, nessuna scrittura necessaria.")
 
     def recover_node(self, node):
-        """Recupera un nodo e ripristina le sue chiavi, rimuovendo le chiavi dai nodi ospitanti."""
+        """Recupera un nodo e ripristina le sue chiavi, rimuovendo le chiavi dai nodi ospitanti solo se necessario."""
         print(f"Recovering node {node.node_id}...")
 
         # Trova le chiavi che sono state spostate temporaneamente
-        keys_to_recover = [key for key, (temp_node_id, value) in self.temp_key_storage.items() if temp_node_id != node.node_id]
+        keys_to_recover = [
+            key for key, (temp_node_id, value) in self.temp_key_storage.items()
+            if temp_node_id != node.node_id
+        ]
         print(f"Keys to recover: {keys_to_recover}")
 
         for key in keys_to_recover:
-            # Identifica il nodo ospitante
+            # Identifica il nodo ospitante temporaneo
             temp_node_id, value = self.temp_key_storage[key]
             temp_node = self.get_node_by_id(temp_node_id)
 
@@ -102,19 +110,25 @@ class ConsistentHash:
             if temp_node and temp_node_id != node.node_id:
                 print(f"Restoring key '{key}' to node {node.node_id} from temporary node {temp_node_id}...")
 
+                # Elimina la chiave solo se il nodo ospitante non è una replica naturale
                 if temp_node not in naturally_responsible_nodes:
-                    # Elimina la chiave solo se non è una replica naturale
+                    print(f"Deleting key '{key}' from temporary node {temp_node_id} because it is not a natural replica.")
                     temp_node.delete(key)  # Elimina dal DB del nodo ospitante
-                    print(f"Deleted key '{key}' from temporary node {temp_node_id}.")
                 else:
-                    print(f"Key '{key}' is a natural replica of node {node.node_id}. Skipping deletion.")
-                # Scrivi la chiave e il valore nel nodo recuperato
-                node.write(key, value)
+                    print(f"Skipping deletion for key '{key}' on node {temp_node_id}, it is a natural replica.")
+
+                # Scrivi la chiave e il valore nel nodo recuperato, solo se non esiste già
+                if not node.key_exists(key):
+                    print(f"Writing key '{key}' to recovered node {node.node_id}.")
+                    node.write(key, value)
+                else:
+                    print(f"Key '{key}' already exists on node {node.node_id}, skipping write.")
 
                 # Rimuovi la chiave dalla memoria temporanea
                 del self.temp_key_storage[key]
 
         print(f"Node {node.node_id} recovery complete.")
+
 
     def get_node_by_id(self, node_id):
         """Ottieni un nodo dal suo ID."""
