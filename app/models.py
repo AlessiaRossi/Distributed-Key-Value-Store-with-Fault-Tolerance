@@ -118,31 +118,28 @@ class ReplicaNode:
         conn.close()
         return rows
 
-
 class ReplicationManager:
-    def __init__(self, replication_factor=3, strategy='full'):
+    def __init__(self, nodes_db=3, port=5000, strategy='full', replication_factor=None):
         # Initializes the replication manager with a specified replication factor.
-        self.replication_factor = replication_factor
+        self.nodes_db = nodes_db
+        # Initializes the replication strategy to 'full' by default.
         self.strategy = strategy
         # Creates a list of replica nodes with unique identifiers and ports.
-        self.nodes = [ReplicaNode(i, 5000 + i) for i in range(replication_factor)]
+        self.nodes = [ReplicaNode(i, port + i) for i in range(self.nodes_db)]
         # Initializes the replication strategy based on the specified strategy.
         self.consistent_hash = None
+
         if strategy == 'consistent':
-            self.consistent_hash = ConsistentHash(self.nodes, replicas=self.replication_factor)
-            print(f'ReplicationManager: consistent_hash={self.consistent_hash}')
+            self.consistent_hash = ConsistentHash(self.nodes, replicas=replication_factor)
 
     def set_replication_strategy(self, strategy, replication_factor=None):
         self.strategy = strategy
-        if replication_factor:
-            self.replication_factor = replication_factor
+
         if strategy == 'consistent':
-            self.consistent_hash = ConsistentHash(self.nodes, replicas=self.replication_factor)
+            self.consistent_hash = ConsistentHash(self.nodes, replicas=replication_factor)
+            print(f"Setting replication strategy to {strategy} with replication factor {replication_factor}")
         else:
             self.consistent_hash = None
-        print(f'Set replication strategy to {strategy}')
-        print(f'Replication factor: {self.replication_factor}')
-        print(f'Consistent hash: {self.consistent_hash}')
 
     def write_to_replicas(self, key, value):
         # Writes a key-value pair to all active replica nodes.

@@ -2,8 +2,8 @@ import hashlib
 import bisect
 
 class ConsistentHash:
-    def __init__(self, nodes=None, replicas=3):
-        self.replicas = replicas
+    def __init__(self, nodes=None, replicas=None):
+        self.replicas = replicas or len(nodes)  # Numero di repliche per nodo
         self.ring = dict()  # Dizionario hash -> nodo
         self.sorted_keys = []  # Lista ordinata per la ricerca binaria
         self.key_assignments = {}  # Traccia key -> nodo assegnato
