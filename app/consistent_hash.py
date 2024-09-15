@@ -86,19 +86,20 @@ class ConsistentHash:
                     # Se la chiave non esiste nel nodo successivo, spostala
                     next_node.write(key, value)  # Scrivi la chiave nel nuovo nodo
                     self.temp_key_storage[key] = (next_node.node_id, value)  # Traccia la chiave spostata con il valore
+                    print(f"Chiave '{key}' scritta nel nodo {next_node.node_id}.")
                 else:
                     print(f"La chiave '{key}' esiste già nel nodo {next_node.node_id}, nessuna scrittura necessaria.")
 
     def recover_node(self, node):
         """Recupera un nodo e ripristina le sue chiavi, rimuovendo le chiavi dai nodi ospitanti solo se necessario."""
-        print(f"Recovering node {node.node_id}...")
+        print(f"Recupero node {node.node_id}...")
 
         # Trova le chiavi che sono state spostate temporaneamente
         keys_to_recover = [
             key for key, (temp_node_id, value) in self.temp_key_storage.items()
             if temp_node_id != node.node_id
         ]
-        print(f"Keys to recover: {keys_to_recover}")
+        print(f"Chiavi da recuperare: {keys_to_recover}")
 
         for key in keys_to_recover:
             # Identifica il nodo ospitante temporaneo
@@ -127,7 +128,7 @@ class ConsistentHash:
                 # Rimuovi la chiave dalla memoria temporanea
                 del self.temp_key_storage[key]
 
-        print(f"Node {node.node_id} recovery complete.")
+        print(f"Recupero del nodo {node.node_id} completato.")
 
 
     def get_node_by_id(self, node_id):
