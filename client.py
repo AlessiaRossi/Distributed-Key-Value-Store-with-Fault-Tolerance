@@ -1,3 +1,5 @@
+import json
+import os
 import requests
 
 # This script contains the definition of a client class to interact with the server
@@ -8,8 +10,21 @@ class DistributedKVClient:
     def __init__(self, base_url, api_token):
         self.base_url = base_url # Server URL to interact with
         self.headers = {"Authorization": f"Bearer {api_token}"} # API token for authentication
+        self.check_initialization()
 
-
+    def check_initialization(self):
+        if not self.base_url or not self.headers.get('Authorization'):
+            print("Error: Client not initialized. Please provide the base URL and API token.")
+            return False
+        try:
+            response = requests.get(self.base_url + '/nodes', headers=self.headers)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            print(f"Error: Failed to establish a connection to {self.base_url}. Please check the URL and your configuration.")
+            exit()
+            return False
+        return True
+    
     # Validation of the key and value
     def validate_key(self, key):  # Key should be a string
         if not key or key.strip() == "":
@@ -168,154 +183,142 @@ class DistributedKVClient:
         except ValueError:
             print(f"Response: {response.text}")
 
-
-
-
-# Method for demonstrate the behavior of a distributed key-value store system in scenarios of node failure and
-# recovery
-def demonstrate_fail_recover_behavior(client):
-    print("\n--- Demonstrating Fail-Recover Behavior ---")
-
-    # Step 1: Writing initial data
-    print("\nStep 1: Writing initial data...")
-    client.write('key1', 'value1')
-    client.write('key2', 'value2')
-
-    # Verifying the written data
-    print("\nVerifying initial data...")
-    client.read('key1')
-    client.read('key2')
-
-    # Step 2: Failing a node
-    print("\nStep 2: Failing a node (node 1)...")
-    client.fail_node(1)
-
-    # Step 3: Verifying data availability after node failure
-    print("\nStep 3: Verifying data availability after node failure...")
-    client.read('key1')
-    client.read('key2')
-
-    # Step 4: Writing additional data during node failure
-    print("\nStep 4: Writing additional data while node 1 is failed...")
-    client.write('key3', 'value3')
-
-    # Verifying the data written during node failure
-    print("\nVerifying data written during node failure...")
-    client.read('key3')
-
-    # Step 5: Recovering the failed node
-    print("\nStep 5: Recovering the failed node (node 1)...")
-    client.recover_node(1)
-
-    # Step 6: Verifying data synchronization after node recovery
-    print("\nStep 6: Verifying data synchronization after node recovery...")
-    client.read('key1')
-    client.read('key2')
-    client.read('key3')
-
-    print("\n--- Demonstration Completed ---")
-
+# Function to load configuration values from a JSON file
+def load_config(file_path, default_config=None):
+    if default_config is None:
+        default_config = {
+            "host": "127.0.0.1",  # Default host
+            "port": 5000,  # Default port
+            "API_TOKEN": "your_api_token_here"  # Default API token (replace with a secure value)
+        }
+    
+    # If the file doesn't exist, create the directory and file with default values
+    if not os.path.exists(file_path):
+        dir_name = os.path.dirname(file_path)
+        # Create the directory if it doesn't exist
+        if not os.path.exists(dir_name) and dir_name != '':
+            os.makedirs(dir_name)
+        # Write the default values into the JSON file
+        with open(file_path, 'w') as f:
+            json.dump(default_config, f)
+        return default_config
+    
+    # If the file exists, load the values from the JSON file
+    try:
+        with open(file_path, 'r') as f:
+            data = json.load(f)
+            # Return the merged configuration (file + defaults for missing values)
+            return {**default_config, **data}
+    except (json.JSONDecodeError, KeyError):
+        # If the JSON file is corrupted or doesn't contain the correct values, return the default config
+        return default_config
 
 # This script is the entry point for a command-line interface (CLI) to interact with a distributed key-value store.
 if __name__ == "__main__":
-    # Base URL for the distributed key-value store API
-    base_url = "http://127.0.0.1:5000"
+    # Path to the JSON configuration file
+    file_path = 'config/config_client.json'
 
-    # API token for authentication (replace with the actual token)
-    api_token = "your_api_token_here"
+    # Load the entire configuration (replication factor and API token)
+    config = load_config(file_path)
+
+    # Extract the host and port values from the configuration
+    host = config.get('host')
+    port = config.get('port')
+    api_token = config.get('API_TOKEN')
+
+    # Base URL for the distributed key-value store API
+    base_url = "http://" + str(host) + ":" + str(port)
 
     # Create an instance of the DistributedKVClient with the base URL and API token
     client = DistributedKVClient(base_url, api_token)
 
-    number_of_nodes = client.get_number_of_nodes()
+    if client.check_initialization():
+        print("Client initialized successfully.")
+        number_of_nodes = client.get_number_of_nodes()
 
-    strategy = None
+        strategy = None
 
-    # Infinite loop to display options and perform corresponding actions based on user input
-    while True:
-        # Print the available options to the user
-        print("\nOptions:")
-        if strategy is None:
-            print("1. Set replication strategy consistent/full (default: full)")
-        else:
-            print(f"1. Set replication strategy consistent/full (actived: {strategy})")
-        print("2. Write key-value")
-        print("3. Read value by key")
-        print("4. Delete key-value")
-        print("5. Fail a node")
-        print("6. Recover a node")
-        print("7. Get nodes status")
-        print("8. Demonstrate fail-recover behavior")
-        print("9. Recover all nodes")
-        print("10. Exit")
-
-
-        # Prompt the user to enter their choice
-        choice = input("Enter your choice: ")
-
-        # Execute actions based on the user's choice
-        if choice == '1':
-            # Option to set the replication strategy
-            strategy = input("Enter strategy (full/consistent): ")
-            replication_factor = None
-            if strategy == 'consistent':
-                while True:
-                    replication_factor = int(input(f"Enter replication factor (<{number_of_nodes}): "))
-                    if replication_factor < number_of_nodes:
-                        break
-                    else:
-                        change_to_full = input("Replication factor must be less than the number of nodes.\nDo you want to switch to 'full' strategy? (yes/no): ").strip().lower()
-                        if change_to_full == 'yes':
-                            strategy = 'full'
-                            replication_factor = None
-                            break
-            if strategy in ['consistent', 'full']:
-                client.set_replication_strategy(strategy, replication_factor)
+        # Infinite loop to display options and perform corresponding actions based on user input
+        while True:
+            # Print the available options to the user
+            print("\nOptions:")
+            if strategy is None:
+                print("1. Set replication strategy consistent/full (default: full)")
             else:
-                strategy = None
-                print("Invalid strategy. Please try again.")
+                print(f"1. Set replication strategy consistent/full (actived: {strategy})")
+            print("2. Write key-value")
+            print("3. Read value by key")
+            print("4. Delete key-value")
+            print("5. Fail a node")
+            print("6. Recover a node")
+            print("7. Get nodes status")
+            print("8. Demonstrate fail-recover behavior")
+            print("9. Recover all nodes")
+            print("10. Exit")
 
-        elif choice == '2':
-            # Option to write a key-value pair
-            key = input("Enter key: ")
-            value = input("Enter value: ")
-            client.write(key, value)
 
-        elif choice == '3':
-            # Option to read a value by key
-            key = input("Enter key: ")
-            client.read(key)
+            # Prompt the user to enter their choice
+            choice = input("Enter your choice: ")
 
-        elif choice == '4':
-            # Option to delete a key-value pair
-            key = input("Enter key: ")
-            client.delete(key)
+            # Execute actions based on the user's choice
+            if choice == '1':
+                # Option to set the replication strategy
+                strategy = input("Enter strategy (full/consistent): ")
+                replication_factor = None
+                if strategy == 'consistent':
+                    while True:
+                        replication_factor = int(input(f"Enter replication factor (<= {number_of_nodes}): "))
+                        if replication_factor <= number_of_nodes:
+                            break
+                        else:
+                            print(f"Replication factor must be less than or equal to the number of nodes ({number_of_nodes}).")
+                if strategy in ['consistent', 'full']:
+                    client.set_replication_strategy(strategy, replication_factor)
+                else:
+                    strategy = None
+                    print("Invalid strategy. Please try again.")          
 
-        elif choice == '5':
-            # Option to fail a specific node
-            node_id = input("Enter node ID to fail: ")
-            client.fail_node(node_id)
+            elif choice == '2':
+                # Option to write a key-value pair
+                key = input("Enter key: ")
+                value = input("Enter value: ")
+                client.write(key, value)
 
-        elif choice == '6':
-            # Option to recover a specific node
-            node_id = input("Enter node ID to recover: ")
-            client.recover_node(node_id)
+            elif choice == '3':
+                # Option to read a value by key
+                key = input("Enter key: ")
+                client.read(key)
 
-        elif choice == '7':
-            # Option to get the status of all nodes
-            client.get_nodes()
+            elif choice == '4':
+                # Option to delete a key-value pair
+                key = input("Enter key: ")
+                client.delete(key)
 
-        elif choice == '8':
-            # Option to demonstrate the fail-recover behavior
-            demonstrate_fail_recover_behavior(client)
+            elif choice == '5':
+                # Option to fail a specific node
+                node_id = input("Enter node ID to fail: ")
+                client.fail_node(node_id)
 
-        elif choice == '9':
-            # Option to recover all nodes
-            client.recover_all_nodes()
+            elif choice == '6':
+                # Option to recover a specific node
+                node_id = input("Enter node ID to recover: ")
+                client.recover_node(node_id)
 
-        elif choice == '10':
-            # Exit the program
-            break
-        else:
-            # Handle invalid choices
-            print("Invalid choice. Please try again.")
+            elif choice == '7':
+                # Option to get the status of all nodes
+                client.get_nodes()
+
+            elif choice == '8':
+                # Option to demonstrate the fail-recover behavior
+                demonstrate_fail_recover_behavior(client)
+
+            elif choice == '9':
+                # Option to recover all nodes
+                client.recover_all_nodes()
+
+            elif choice == '10':
+                # Exit the program
+                break
+            else:
+                # Handle invalid choices
+                print("Invalid choice. Please try again.")

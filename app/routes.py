@@ -4,47 +4,10 @@ from .models import ReplicationManager
 import json
 import os
 
-# Function to load configuration values from a JSON file
-def load_config(file_path, default_config=None):
-    if default_config is None:
-        default_config = {
-            "replication_factor": 3,  # Default replication factor
-            "API_TOKEN": "your_api_token_here"  # Default API token (replace with a secure value)
-        }
-    
-    # If the file doesn't exist, create the directory and file with default values
-    if not os.path.exists(file_path):
-        dir_name = os.path.dirname(file_path)
-        # Create the directory if it doesn't exist
-        if not os.path.exists(dir_name) and dir_name != '':
-            os.makedirs(dir_name)
-        # Write the default values into the JSON file
-        with open(file_path, 'w') as f:
-            json.dump(default_config, f)
-        return default_config
-    
-    # If the file exists, load the values from the JSON file
-    try:
-        with open(file_path, 'r') as f:
-            data = json.load(f)
-            # Return the merged configuration (file + defaults for missing values)
-            return {**default_config, **data}
-    except (json.JSONDecodeError, KeyError):
-        # If the JSON file is corrupted or doesn't contain the correct values, return the default config
-        return default_config
-
-# Path to the JSON configuration file
-file_path = 'config/config.json'
-
-# Load the entire configuration (replication factor and API token)
-config = load_config(file_path)
-
-# Extract specific values from the configuration
-replication_factor = config.get('replication_factor')
-API_TOKEN = config.get('API_TOKEN')
-
-# Initialize the replication manager with the replication factor from the file
-replication_manager = ReplicationManager(replication_factor=replication_factor)
+# Define the default configuration values
+nodes_db = 3
+port = 5000
+API_TOKEN = "your_api_token_here"
 
 # Decorator to require a valid API token
 def require_api_token(f):
@@ -56,7 +19,19 @@ def require_api_token(f):
     return decorated_function
 
 # Function to register the routes with the Flask app
-def register_routes(app):
+def register_routes(app, config):
+
+    # Extract specific values from the configuration
+    global nodes_db
+    global port
+    global API_TOKEN
+
+    nodes_db = config.get('nodes_db')
+    port = config.get('port')
+    API_TOKEN = config.get('API_TOKEN')
+
+    # Initialize the replication manager with the replication factor from the file
+    replication_manager = ReplicationManager(nodes_db=nodes_db, port=port)
 
     # Route for writing data
     @app.route('/write', methods=['POST'])
@@ -138,7 +113,7 @@ def register_routes(app):
         if 'strategy' not in data:
             return jsonify({'error': 'Invalid input', 'message': 'Replication strategy is required'}), 400
         strategy = data.get('strategy')
-        replication_factor = data.get('replication_factor', replication_manager.replication_factor)
+        replication_factor = data.get('replication_factor')
         try:
             replication_manager.set_replication_strategy(strategy, replication_factor)
             return jsonify({'status': 'success',
