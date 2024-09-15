@@ -55,53 +55,64 @@ class ConsistentHash:
             idx += 1
         return nodes
 
-    def get_next_node(self, key):
-        """Ottieni il nodo successivo per una chiave."""
+    def get_next_node(self, key, exclude_node_id=None):
+        """Ottieni il nodo successivo per una chiave, escludendo eventuali nodi specifici."""
         if not self.ring:
             return None
+
         hash_key = self._hash(key)
         idx = bisect.bisect(self.sorted_keys, hash_key)
-        if idx == len(self.sorted_keys):
-            idx = 0
-        next_idx = (idx + 1) % len(self.sorted_keys)
-        return self.ring[self.sorted_keys[next_idx]]
+        
+        # Cerca il prossimo nodo attivo nel ring, evitando il nodo specificato da escludere
+        for i in range(len(self.sorted_keys)):
+            next_idx = (idx + i) % len(self.sorted_keys)  # Cicla in avanti
+            next_node = self.ring[self.sorted_keys[next_idx]]
+            
+            if next_node.node_id != exclude_node_id:  # Escludi il nodo specificato
+                return next_node
+        
+        return None  # Se non trova nodi validi
 
     def redistribute_keys(self, node):
         """Ridistribuisce le chiavi di un nodo fallito al successivo nodo attivo."""
         # Ottieni il nodo successivo per tutte le chiavi del nodo fallito
-        next_node = self.get_next_node(f'{node.node_id}:0')  # Il nodo successivo nel ring
+        next_node = self.get_next_node(f'{node.node_id}:0', exclude_node_id=node.node_id)  # Il nodo successivo nel ring
 
         if next_node:
             print(f"Redistribuzione delle chiavi del nodo {node.node_id} al nodo {next_node.node_id}")
             for key, value in node.get_all_keys():  # Recupera tutte le chiavi dal nodo fallito
                 next_node.write(key, value)  # Scrivi le chiavi nel nuovo nodo
-                self.temp_key_storage[key] = next_node.node_id  # Traccia le chiavi spostate
+                self.temp_key_storage[key] = (next_node.node_id, value)  # Traccia le chiavi spostate con valore
 
     def recover_node(self, node):
         """Recupera un nodo e ripristina le sue chiavi, rimuovendo le chiavi dai nodi ospitanti."""
         print(f"Recovering node {node.node_id}...")
 
-        # Trova le chiavi che sono state ospitate temporaneamente
-        keys_to_recover = [key for key, temp_node_id in self.temp_key_storage.items() if temp_node_id != node.node_id]
+        # Trova le chiavi che sono state spostate temporaneamente
+        keys_to_recover = [key for key, (temp_node_id, value) in self.temp_key_storage.items() if temp_node_id != node.node_id]
         print(f"Keys to recover: {keys_to_recover}")
 
         for key in keys_to_recover:
             # Identifica il nodo ospitante
-            temp_node_id = self.temp_key_storage[key]
+            temp_node_id, value = self.temp_key_storage[key]
             temp_node = self.get_node_by_id(temp_node_id)
 
+            # Verifica se il nodo ospitante è una replica naturale di questa chiave
+            naturally_responsible_nodes = self.get_nodes_for_key(key)
             if temp_node and temp_node_id != node.node_id:
-                # Leggi il valore dal nodo temporaneo
-                value = temp_node.read(key)  # Leggi il valore dal nodo ospitante
-                if value is not None:
-                    # Elimina la chiave dal nodo ospitante
+                print(f"Restoring key '{key}' to node {node.node_id} from temporary node {temp_node_id}...")
+
+                if temp_node not in naturally_responsible_nodes:
+                    # Elimina la chiave solo se non è una replica naturale
                     temp_node.delete(key)  # Elimina dal DB del nodo ospitante
+                    print(f"Deleted key '{key}' from temporary node {temp_node_id}.")
+                else:
+                    print(f"Key '{key}' is a natural replica of node {node.node_id}. Skipping deletion.")
+                # Scrivi la chiave e il valore nel nodo recuperato
+                node.write(key, value)
 
-                    # Scrivi la chiave e il valore nel nodo recuperato
-                    node.write(key, value)  # Ripristina la chiave e il valore nel DB del nodo recuperato
-
-                    # Rimuovi la chiave dalla memoria temporanea
-                    del self.temp_key_storage[key]
+                # Rimuovi la chiave dalla memoria temporanea
+                del self.temp_key_storage[key]
 
         print(f"Node {node.node_id} recovery complete.")
 
