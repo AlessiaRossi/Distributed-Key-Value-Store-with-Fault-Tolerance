@@ -68,7 +68,7 @@ class ConsistentHash:
             next_idx = (idx + i) % len(self.sorted_keys)  # Cicla in avanti
             next_node = self.ring[self.sorted_keys[next_idx]]
             
-            if next_node.node_id != exclude_node_id:  # Escludi il nodo specificato
+            if next_node.is_alive() and next_node.node_id != exclude_node_id:  # Escludi il nodo specificato
                 return next_node
         
         return None  # Se non trova nodi validi
