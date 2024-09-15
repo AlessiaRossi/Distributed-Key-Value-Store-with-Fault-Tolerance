@@ -252,9 +252,8 @@ if __name__ == "__main__":
             print("5. Fail a node")
             print("6. Recover a node")
             print("7. Get nodes status")
-            print("8. Demonstrate fail-recover behavior")
-            print("9. Recover all nodes")
-            print("10. Exit")
+            print("8. Recover all nodes")
+            print("9. Exit")
 
 
             # Prompt the user to enter their choice
@@ -309,14 +308,10 @@ if __name__ == "__main__":
                 client.get_nodes()
 
             elif choice == '8':
-                # Option to demonstrate the fail-recover behavior
-                demonstrate_fail_recover_behavior(client)
-
-            elif choice == '9':
                 # Option to recover all nodes
                 client.recover_all_nodes()
 
-            elif choice == '10':
+            elif choice == '9':
                 # Exit the program
                 break
             else:
