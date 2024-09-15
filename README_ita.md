@@ -215,15 +215,14 @@ Il sistema di archiviazione distribuito con tolleranza ai guasti fornisce una so
 1. Clona il repository:
 
    ```bash
-   git clone https://github.com/AlessiaRossi/Distributed-Key-Value-Store-with-Fault-Tolerance.git
+   git clone https://github.com/AlessiaRossi/Distributed-Key-Value-Store-with-Fault-Tolerance.git 
+   
 
-```
+ 2. Installa le dipendenze:
 
-2. Installa le dipendenze:
-
-```bash
-pip install -r requirements.txt
-```
+   ```bash
+     pip install -r requirements.txt
+   ```
 
 ## Running del programma
 
