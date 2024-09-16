@@ -18,17 +18,19 @@ class ConsistentHash:
 
     def add_node(self, node):
         """Aggiunge un nodo all'anello."""
-        for i in range(self.replicas):
-            key = self._hash(f'{node.node_id}:{i}') # Genera una chiave hash per ogni replica
-            self.ring[key] = node # Mappa la chiave al nodo
-            bisect.insort(self.sorted_keys, key) # Inserisci la chiave nella lista ordinata
+        #for i in range(self.replicas): se nodi virtuali
+        key = self._hash(f'{node.node_id}') # Genera una chiave hash per ogni replica
+        self.ring[key] = node # Mappa la chiave al nodo
+        bisect.insort(self.sorted_keys, key) # Inserisci la chiave nella lista ordinata
+        print(f"Nodo {node.node_id} aggiunto all'anello.")
 
     def remove_node(self, node):
         """Rimuove un nodo dall'anello e riassegna le sue chiavi."""
-        for i in range(self.replicas):
-            key = self._hash(f'{node.node_id}:{i}')
-            del self.ring[key]
-            self.sorted_keys.remove(key)
+        #for i in range(self.replicas): se nodi virtuali
+        key = self._hash(f'{node.node_id}')
+        del self.ring[key]
+        self.sorted_keys.remove(key)
+        print(f"Nodo {node.node_id} rimosso dall'anello.")
         #self._redistribute_keys(node)
 
     def get_node(self, key):
