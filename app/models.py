@@ -146,12 +146,14 @@ class ReplicationManager:
         if self.strategy == 'full':
             for node in self.nodes:
                 if node.is_alive():  # Verifica se il nodo è attivo
+                    print(f"Writing key '{key}' to node {node.node_id}")
                     node.write(key, value)  # Scrive sul nodo.
         # Se la strategia di replica è 'consistent', scrive sul nodo appropriato in base all'hash della chiave.
         elif self.strategy == 'consistent':
             nodes = self.consistent_hash.get_nodes_for_key(key)
             for node in nodes:
                 if node.is_alive():
+                    print(f"Writing key '{key}' to node {node.node_id}")
                     node.write(key, value)
 
     def read_from_replicas(self, key):
@@ -211,6 +213,7 @@ class ReplicationManager:
             }
             for node in self.nodes
         ]
+
 
     def get_nodes_for_key(self, key):
         # Returns the nodes responsible for the key based on the replication strategy.
