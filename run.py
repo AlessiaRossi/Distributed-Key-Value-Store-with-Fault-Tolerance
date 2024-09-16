@@ -4,49 +4,49 @@ import sys
 from app import create_app
 import unittest
 
-# Function to load configuration values from a JSON file
+# Funzione per caricare i valori di configurazione da un file JSON.
 def load_config(file_path, default_config=None):
     if default_config is None:
         default_config = {
             "host": "127.0.0.1",  # Default host
             "port": 5000,  # Default port
-            "nodes_db": 3,  # Default replication factor
-            "API_TOKEN": "your_api_token_here"  # Default API token (replace with a secure value)
+            "nodes_db": 3,  # Default fattore di replica
+            "API_TOKEN": "your_api_token_here"  # Default API token 
         }
     
-    # If the file doesn't exist, create the directory and file with default values
+    # Se il file non esiste, crea la directory e il file con valori predefiniti.
     if not os.path.exists(file_path):
         dir_name = os.path.dirname(file_path)
-        # Create the directory if it doesn't exist
+        # Crea la directory se non esiste
         if not os.path.exists(dir_name) and dir_name != '':
             os.makedirs(dir_name)
-        # Write the default values into the JSON file
+        # Scrivi i valori predefiniti nel file JSON
         with open(file_path, 'w') as f:
             json.dump(default_config, f)
         return default_config
     
-    # If the file exists, load the values from the JSON file
+    # Se il file esiste, carica i valori dal file JSON
     try:
         with open(file_path, 'r') as f:
             data = json.load(f)
-            # Return the merged configuration (file + defaults for missing values)
+            # Restituisci la configurazione unificata (file + valori predefiniti per quelli mancanti)
             return {**default_config, **data}
     except (json.JSONDecodeError, KeyError):
-        # If the JSON file is corrupted or doesn't contain the correct values, return the default config
+        # Se il file JSON è corrotto o non contiene i valori corretti, restituisci la configurazione predefinita
         return default_config
 
 if __name__ == '__main__':
-    # Path to the JSON configuration file
+    # Percorso del file di configurazione JSON
     file_path = 'config/config.json'
 
-    # Load the entire configuration (replication factor and API token)
+    # Carica l'intera configurazione (fattore di replica e token API)
     config = load_config(file_path)
 
-    # Extract the host and port values from the configuration
+    # Estrai i valori dell'host e della porta dalla configurazione
     host = config.get('host')
     port = config.get('port')
 
-    # Create the Flask app
+    # Crea l'app Flask
     app = create_app(config)
 
     if 'test' in sys.argv:
