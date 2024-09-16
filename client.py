@@ -2,11 +2,11 @@ import json
 import os
 import requests
 
-# This script contains the definition of a client class to interact with the server
+# Questo script contiene la definizione di una classe client per interagire con il server
 
 class DistributedKVClient:
 
-    # Initialization of the client
+    # Inizializzazione del client
     def __init__(self, base_url, api_token):
         self.base_url = base_url # Server URL to interact with
         self.headers = {"Authorization": f"Bearer {api_token}"} # API token for authentication
@@ -25,28 +25,28 @@ class DistributedKVClient:
             return False
         return True
     
-    # Validation of the key and value
-    def validate_key(self, key):  # Key should be a string
+    # Validazione della chiave e del valore
+    def validate_key(self, key):  # Key deve essere una stringa
         if not key or key.strip() == "":
             print("Error: Key cannot be empty or whitespace.")
             return False
         return True
 
-    # Validation of the value
+    # Validazione del valore
     def validate_value(self, value):
         if not value or value.strip() == "":
             print("Error: Value cannot be empty or whitespace.")
             return False
         return True
 
-    # Method to validate the node ID
+    # Metodo per validare l'id del nodo
     def validate_node_id(self, node_id):
-        if not str(node_id).isdigit():  # Value should be a string
+        if not str(node_id).isdigit():  # Il valore deve essere una stringa
             print("Error: Node ID must be a valid integer.")
             return False
         return True
 
-    # Method to set the replication strategy and replication factor
+    # Metodo per impostare la strategia di replica e il fattore di replica
     def set_replication_strategy(self, strategy, replication_factor=None):
         strategy = strategy.strip()
         url = f"{self.base_url}/set_replication_strategy"
@@ -59,7 +59,7 @@ class DistributedKVClient:
         except requests.RequestException as e:
             print(f"Request failed: {e}")
 
-    # Method to write a key and value to the server
+    # Metodo per scrivere una chiave e un valore sul server
     def write(self, key, value, strategy='full', replication_factor=None):
         if not self.validate_key(key) or not self.validate_value(value):
             return
@@ -73,7 +73,7 @@ class DistributedKVClient:
         except requests.RequestException as e:
             print(f"Request failed: {e}")
 
-    # Method to read the value associated with a key
+    # Metodo per leggere il valore associato a una chiave
     def read(self, key):
         if not self.validate_key(key):
             return
@@ -84,7 +84,7 @@ class DistributedKVClient:
         except requests.RequestException as e:
             print(f"Request failed: {e}")
 
-    # Method to delete a value associated with a key
+    # Metodo per eliminare un valore associato a una chiave
     def delete(self, key):
         if not self.validate_key(key):
             return
@@ -95,7 +95,7 @@ class DistributedKVClient:
         except requests.RequestException as e:
             print(f"Request failed: {e}")
 
-    # Method for node failure
+    # Metodo per il fallimento di un nodo
     def fail_node(self, node_id):
         if not self.validate_node_id(node_id):
             return
@@ -106,7 +106,7 @@ class DistributedKVClient:
         except requests.RequestException as e:
             print(f"Request failed: {e}")
 
-    # Method for node recovery
+    # Metodo per il recupero di un nodo
     def recover_node(self, node_id):
         if not self.validate_node_id(node_id):
             return
@@ -117,7 +117,7 @@ class DistributedKVClient:
         except requests.RequestException as e:
             print(f"Request failed: {e}")
 
-    # Method to get the status of all nodes
+    # Metodo per ottenere lo stato di tutti i nodi
     def get_nodes(self):
         url = f"{self.base_url}/nodes"
         try:
@@ -126,6 +126,7 @@ class DistributedKVClient:
         except requests.RequestException as e:
             print(f"Request failed: {e}")
 
+      
     def get_number_of_nodes(self):
         url = f"{self.base_url}/nodes"
         try:
@@ -140,7 +141,7 @@ class DistributedKVClient:
             print(f"Request failed: {e}")
             return 0
 
-    # Method to recover all nodes
+    # Metodo per recuperare tutti i nodi
     def recover_all_nodes(self):
         url = f"{self.base_url}/nodes"
         try:
@@ -159,7 +160,7 @@ class DistributedKVClient:
         except requests.RequestException as e:
             print(f"Request failed: {e}")
 
-    # Method for handling the response
+    # Metodo per gestire la risposta
     def handle_response(self, response):
         try:
             data = response.json()
@@ -183,53 +184,53 @@ class DistributedKVClient:
         except ValueError:
             print(f"Response: {response.text}")
 
-# Function to load configuration values from a JSON file
+# Funzione per caricare i valori di configurazione da un file JSON
 def load_config(file_path, default_config=None):
     if default_config is None:
         default_config = {
             "host": "127.0.0.1",  # Default host
             "port": 5000,  # Default port
-            "API_TOKEN": "your_api_token_here"  # Default API token (replace with a secure value)
+            "API_TOKEN": "your_api_token_here"  # Default API token
         }
     
-    # If the file doesn't exist, create the directory and file with default values
+    # Se il file non esiste, crea la directory e il file con i valori predefiniti
     if not os.path.exists(file_path):
         dir_name = os.path.dirname(file_path)
-        # Create the directory if it doesn't exist
+        # Crea la directory se non esiste
         if not os.path.exists(dir_name) and dir_name != '':
             os.makedirs(dir_name)
-        # Write the default values into the JSON file
+        # Scrivi i valori predefiniti nel file JSON
         with open(file_path, 'w') as f:
             json.dump(default_config, f)
         return default_config
     
-    # If the file exists, load the values from the JSON file
+    # Se il file esiste, carica i valori dal file JSON
     try:
         with open(file_path, 'r') as f:
             data = json.load(f)
-            # Return the merged configuration (file + defaults for missing values)
+            # Restituisci la configurazione unificata (file + valori predefiniti per quelli mancanti)
             return {**default_config, **data}
     except (json.JSONDecodeError, KeyError):
-        # If the JSON file is corrupted or doesn't contain the correct values, return the default config
+        # Se il file JSON è corrotto o non contiene i valori corretti, restituisci la configurazione predefinita
         return default_config
 
-# This script is the entry point for a command-line interface (CLI) to interact with a distributed key-value store.
+# Questo script è il punto di ingresso per un'interfaccia a riga di comando (CLI) per interagire con sistema di memorizzazione distribuita di coppie chiave-valore.
 if __name__ == "__main__":
-    # Path to the JSON configuration file
+    # Percorso del file di configurazione JSON
     file_path = 'config/config_client.json'
 
-    # Load the entire configuration (replication factor and API token)
+    # Carica l'intera configurazione (fattore di replica e token API)
     config = load_config(file_path)
 
-    # Extract the host and port values from the configuration
+    # Estrai i valori dell'host e della porta dalla configurazione
     host = config.get('host')
     port = config.get('port')
     api_token = config.get('API_TOKEN')
 
-    # Base URL for the distributed key-value store API
+    # URL di base per l'API del sistema di memorizzazione distribuita di coppie chiave-valore
     base_url = "http://" + str(host) + ":" + str(port)
 
-    # Create an instance of the DistributedKVClient with the base URL and API token
+    # Crea un'istanza di DistributedKVClient con l'URL di base e il token API
     client = DistributedKVClient(base_url, api_token)
 
     if client.check_initialization():
@@ -238,7 +239,7 @@ if __name__ == "__main__":
 
         strategy = None
 
-        # Infinite loop to display options and perform corresponding actions based on user input
+        # Menu per visualizzare le opzioni e eseguire le azioni corrispondenti in base all'input dell'utente
         while True:
             # Print the available options to the user
             print("\nOptions:")
@@ -256,12 +257,12 @@ if __name__ == "__main__":
             print("9. Exit")
 
 
-            # Prompt the user to enter their choice
+            # Chiedi all'utente di inserire la propria scelta
             choice = input("Enter your choice: ")
 
-            # Execute actions based on the user's choice
+            # Esegui l'azione in base alla scelta
             if choice == '1':
-                # Option to set the replication strategy
+                # Opzione per impostare la strategia di replica
                 strategy = input("Enter strategy (full/consistent): ")
                 replication_factor = None
                 if strategy == 'consistent':
@@ -278,42 +279,42 @@ if __name__ == "__main__":
                     print("Invalid strategy. Please try again.")          
 
             elif choice == '2':
-                # Option to write a key-value pair
+                # Opzione per scrivere una coppia chiave-valore
                 key = input("Enter key: ")
                 value = input("Enter value: ")
                 client.write(key, value)
 
             elif choice == '3':
-                # Option to read a value by key
+                # Opzione per leggere un valore tramite chiave
                 key = input("Enter key: ")
                 client.read(key)
 
             elif choice == '4':
-                # Option to delete a key-value pair
+                # Opzione per eliminare una coppia chiave-valore
                 key = input("Enter key: ")
                 client.delete(key)
 
             elif choice == '5':
-                # Option to fail a specific node
+                # Opzione per far fallire un nodo specifico
                 node_id = input("Enter node ID to fail: ")
                 client.fail_node(node_id)
 
             elif choice == '6':
-                # Option to recover a specific node
+                # Opzione per recuperare un nodo specifico
                 node_id = input("Enter node ID to recover: ")
                 client.recover_node(node_id)
 
             elif choice == '7':
-                # Option to get the status of all nodes
+                # Opzione per ottenere lo stato di tutti i nodi
                 client.get_nodes()
 
             elif choice == '8':
-                # Option to recover all nodes
+                # Opzione per recuperare tutti i nodi
                 client.recover_all_nodes()
 
             elif choice == '9':
-                # Exit the program
+                # Esci dal programma
                 break
             else:
-                # Handle invalid choices
+                # Gestire la scelta non valida
                 print("Invalid choice. Please try again.")
