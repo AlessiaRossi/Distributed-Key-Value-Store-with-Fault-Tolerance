@@ -68,16 +68,24 @@ A series of tests were conducted to evaluate the system's fault tolerance capabi
 
 We measured the performance of the system under different replication strategies. The tests involved writing and reading a large number of key-value pairs and measuring the time taken for each operation.
 
-- **Test 1: Write Performance**
-  - **Setup**: 3 nodes, replication factor of 2.
-  - **Operation**: Write 1000 key-value pairs.
-  - **Result**: Average write time: 50ms.
+- **Test 1: Results Consistent Strategy**
+  - **Fail**: 0,0200 s
+  - **Recover**: 0,0100 s
+  - **Read**: 0,0105 s
+  - **Write**: 0,1703
 
-- **Test 2: Read Performance**
-  - **Setup**: 3 nodes, replication factor of 2.
-  - **Operation**: Read 1000 key-value pairs.
-  - **Result**: Average read time: 30ms.
+- **Test 2: Result Fail/Recover Full Strategy**
+ ??
 
+- **Test 3: Result Full Strategy**
+  - **Fail**: 0,0000 s
+  - **Recover**: 0,2274 s
+  - **Read**: 0,0000 s
+  - **Write**: 0,1118 s
+
+
+ **Total test** : 1.090 s (6 tests)
+ 
 ## Analysis
 
 The experimental results demonstrate that the system effectively handles node failures and recoveries, maintaining data availability and consistency. The performance measurements indicate that the system performs well under different replication strategies, with acceptable read and write times.
