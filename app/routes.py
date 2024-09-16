@@ -4,12 +4,12 @@ from .models import ReplicationManager
 import json
 import os
 
-# Define the default configuration values
+# Definisce i valori di configurazione predefiniti.
 nodes_db = 3
 port = 5000
 API_TOKEN = "your_api_token_here"
 
-# Decorator to require a valid API token
+# Decorator per richiedere un token API valido.
 def require_api_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -18,10 +18,10 @@ def require_api_token(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# Function to register the routes with the Flask app
+# Funzione per registrare le routes con l'app Flask
 def register_routes(app, config):
 
-    # Extract specific values from the configuration
+    # Estrai valori specifici dalla configurazione.
     global nodes_db
     global port
     global API_TOKEN
@@ -30,10 +30,10 @@ def register_routes(app, config):
     port = config.get('port')
     API_TOKEN = config.get('API_TOKEN')
 
-    # Initialize the replication manager with the replication factor from the file
+    # Inizializza il gestore della replica con il fattore di replica dal file.
     replication_manager = ReplicationManager(nodes_db=nodes_db, port=port)
 
-    # Route for writing data
+    # Route per scrivere i dati.
     @app.route('/write', methods=['POST'])
     @require_api_token
     def write():
@@ -50,7 +50,7 @@ def register_routes(app, config):
         except Exception as e:
             return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
 
-    # Route for reading data
+    # Route per leggere i dati
     @app.route('/read/<key>', methods=['GET'])
     @require_api_token
     def read(key):
@@ -63,7 +63,7 @@ def register_routes(app, config):
         except Exception as e:
             return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
 
-    # Route for deleting data
+    # Route per eliminare dati.
     @app.route('/delete/<key>', methods=['DELETE'])
     @require_api_token
     def delete(key):
@@ -75,7 +75,7 @@ def register_routes(app, config):
         except Exception as e:
             return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
 
-    # Route for failing a node
+    # Route per far fallire un nodo.
     @app.route('/fail/<int:node_id>', methods=['POST'])
     @require_api_token
     def fail_node(node_id):
@@ -85,7 +85,7 @@ def register_routes(app, config):
         except Exception as e:
             return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
 
-    # Route for recovering a node
+    # Route per recuperare un nodo.
     @app.route('/recover/<int:node_id>', methods=['POST'])
     @require_api_token
     def recover_node(node_id):
@@ -95,7 +95,7 @@ def register_routes(app, config):
        except Exception as e:
            return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
 
-    # Route for getting the status of all nodes
+    # Route per recuperare lo stato di un nodo.
     @app.route('/nodes', methods=['GET'])
     @require_api_token
     def get_nodes():
@@ -105,7 +105,7 @@ def register_routes(app, config):
         except Exception as e:
             return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
 
-    # Route for setting the replication strategy
+    # Route per settare la strategia di replicazione.
     @app.route('/set_replication_strategy', methods=['POST'])
     @require_api_token
     def set_replication_strategy():
@@ -121,7 +121,7 @@ def register_routes(app, config):
         except Exception as e:
             return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
 
-    # Route for getting the nodes responsible for a key
+    # Route per ottenere i nodi responsabili di una chiave
     @app.route('/nodes_for_key/<key>', methods=['GET'])
     @require_api_token
     def nodes_for_key(key):
