@@ -182,15 +182,27 @@ Abbiamo condotto una serie di test per valutare le capacità di tolleranza ai gu
 
 Abbiamo misurato le prestazioni del sistema sotto diverse strategie di replica. I test hanno coinvolto la scrittura e lettura di un gran numero di coppie chiave-valore e la misurazione del tempo impiegato per ciascuna operazione.
 
-- **Test 1: Prestazioni di Scrittura**
-  - **Setup**: 3 nodi, fattore di replica di 2.
-  - **Operazione**: Scrittura di 1000 coppie chiave-valore.
-  - **Risultato**: Tempo medio di scrittura: 50ms.
+### Performance Measurement
 
-- **Test 2: Prestazioni di Lettura**
-  - **Setup**: 3 nodi, fattore di replica di 2.
-  - **Operazione**: Lettura di 1000 coppie chiave-valore.
-  - **Risultato**: Tempo medio di lettura: 30ms.
+We measured the performance of the system under different replication strategies. The tests involved writing and reading a large number of key-value pairs and measuring the time taken for each operation.
+
+- **Test 1: Risultati Consistent Strategy**
+  - **Fail**: 0,0200 s
+  - **Recover**: 0,0100 s
+  - **Read**: 0,0105 s
+  - **Write**: 0,1703
+
+- **Test 2: Risultati Fail/Recover Full Strategy**
+ ??
+
+- **Test 3: Risultati Full Strategy**
+  - **Fail**: 0,0000 s
+  - **Recover**: 0,2274 s
+  - **Read**: 0,0000 s
+  - **Write**: 0,1118 s
+
+
+ **Total test** : 1.090 s (6 test)
 
 ### Analisi
 
