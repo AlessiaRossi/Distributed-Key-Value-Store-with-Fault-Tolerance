@@ -1,3 +1,7 @@
 requests~=2.31.0
 Flask~=2.1.1
 unittest2~=1.1.0
+sqlite3
+unittest
+bisect
+hashlib
