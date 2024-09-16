@@ -20,6 +20,12 @@ class TestPerformanceFull(unittest.TestCase):
         self.replication_manager_full = ReplicationManager(nodes_db=self.nodes_db, strategy='full',
                                                            replication_factor=self.replication_factor)
 
+
+
+    def tearDown(self):
+        for i in range(self.range_to_test):
+            self.replication_manager_full.delete_from_replicas(f'key_{i}')
+
     def test_write_performance_full(self):
         start_time = time.time()
         for i in range(self.range_to_test):
@@ -71,6 +77,10 @@ class TestPerformanceConsistent(unittest.TestCase):
         self.replication_factor = 2
         self.replication_manager_consistent = ReplicationManager(nodes_db=self.nodes_db, strategy='consistent',
                                                                  replication_factor=self.replication_factor)
+
+    def tearDown(self):
+        for i in range(self.range_to_test):
+            self.replication_manager_consistent.delete_from_replicas(f'key_{i}')
 
     def test_write_performance_consistent(self):
         start_time = time.time()
