@@ -103,7 +103,7 @@ python client.py
 
 5. Run the test suite:
 ```bash
-python -m unittest discover -s tests
+python -m unittest test_performance.py
 ```
 
 ## **5. API Endpoints**

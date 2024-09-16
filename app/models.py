@@ -5,110 +5,110 @@ from .consistent_hash import ConsistentHash
 
 class ReplicaNode:
     def __init__(self, node_id, port):
-        # Initializes a replica node with a unique identifier and a port.
+        # Inizializza un nodo replica con un identificatore univoco e una porta.
         self.node_id = node_id
         self.port = port
-        self.name_db = f'replica_{node_id}.db'  # Name of the database file for this node.
-        self.db_path = os.path.join('db', self.name_db)  # Path to the database file for this node.
-        self.alive = True  # Initial state of the node is active.
-        self.create_db_directory()  # Creates the 'db' directory if it does not exist.
-        self._initialize_db()  # Initializes the database if it does not exist.
+        self.name_db = f'replica_{node_id}.db'  # Nome del file del database per questo nodo.
+        self.db_path = os.path.join('db', self.name_db)  # Percorso del file del database per questo nodo.
+        self.alive = True  # Lo stato iniziale del nodo è attivo.
+        self.create_db_directory()  # Crea la directory 'db' se non esiste già.
+        self._initialize_db()  # Inizializza il db se non esiste già-
 
     def create_db_directory(self):
-        # Creates the 'db' directory if it does not already exist.
+        # Crea la directory 'db' se non esiste già.
         if not os.path.exists('db'):
-            os.makedirs('db')  # Creates the directory.
+            os.makedirs('db')  # Crea la directory.
 
     def _initialize_db(self):
-        # Creates the 'kv_store' table if it does not already exist in the database.
+        # Crea la tabella 'kv_store' se non esiste già nel database.
         if not os.path.exists(self.db_path):
-            conn = sqlite3.connect(self.db_path)  # Connects to the database.
-            cursor = conn.cursor()  # Creates a cursor to execute SQL commands.
+            conn = sqlite3.connect(self.db_path)  # Si connette al db
+            cursor = conn.cursor()  # Crea un cursore per eseguire comandi SQL.
             cursor.execute(
-                '''CREATE TABLE IF NOT EXISTS kv_store (key TEXT PRIMARY KEY, value TEXT)''')  # Creates the table.
-            conn.commit()  # Commits the changes to the database.
-            conn.close()  # Closes the connection to the database.
+                '''CREATE TABLE IF NOT EXISTS kv_store (key TEXT PRIMARY KEY, value TEXT)''')  # Crea la tabella
+            conn.commit()  # Committa sul db
+            conn.close()  # Chiude la connessione al db.
 
     def write(self, key, value):
-        # Writes a key-value pair to the database only if the node is active.
+        # Scrive una coppia chiave-valore nel database solo se il nodo è attivo.
         if self.alive:
-            conn = sqlite3.connect(self.db_path)  # Connects to the database.
-            cursor = conn.cursor()  # Creates a cursor to execute SQL commands.
+            conn = sqlite3.connect(self.db_path)  # Si connette al db
+            cursor = conn.cursor()  # Crea un cursore per eseguire comandi SQL.
             cursor.execute('''INSERT OR REPLACE INTO kv_store (key, value) VALUES (?, ?)''',
                            (key, value))  # Inserts or updates the data.
-            conn.commit()  # Commits the changes to the database.
-            conn.close()  # Closes the connection to the database.
+            conn.commit()  # Committa sul db
+            conn.close()  # Chiude la connessione al db.
 
     def read(self, key):
-        # Reads the value associated with a key from the database only if the node is active.
+        # Legge il valore associato a una chiave dal database solo se il nodo è attivo.
         if self.alive:
-            conn = sqlite3.connect(self.db_path)  # Connects to the database.
-            cursor = conn.cursor()  # Creates a cursor to execute SQL commands.
-            cursor.execute('''SELECT value FROM kv_store WHERE key=?''', (key,))  # Selects the value for the key.
-            result = cursor.fetchone()  # Retrieves the result of the query.
-            conn.close()  # Closes the connection to the database.
-            return result[0] if result else None  # Returns the value if found, otherwise None.
+            conn = sqlite3.connect(self.db_path)  # Si connette al db
+            cursor = conn.cursor()  # Crea un cursore per eseguire comandi SQL.
+            cursor.execute('''SELECT value FROM kv_store WHERE key=?''', (key,))  # Seleziona la value per la key indicata.
+            result = cursor.fetchone()  # Recupera il risultato della query.
+            conn.close()  # Chiude la connessione al db.
+            return result[0] if result else None  # Restituisce il valore se trovato, altrimenti None.
 
     def delete(self, key):
-        # Deletes the key-value pair from the database only if the node is active.
+        # Elimina la coppia chiave-valore dal database solo se il nodo è attivo.
         if self.alive:
-            conn = sqlite3.connect(self.db_path)  # Connects to the database.
-            cursor = conn.cursor()  # Creates a cursor to execute SQL commands.
-            cursor.execute('''DELETE FROM kv_store WHERE key=?''', (key,))  # Deletes the data associated with the key.
-            conn.commit()  # Commits the changes to the database.
-            conn.close()  # Closes the connection to the database.
+            conn = sqlite3.connect(self.db_path)  #  Si connette al db
+            cursor = conn.cursor()  # Crea un cursore per eseguire comandi SQL.
+            cursor.execute('''DELETE FROM kv_store WHERE key=?''', (key,))  #Elimina la coppia chiave-valore dal database solo se il nodo è attivo.
+            conn.commit()  # Committa sul db
+            conn.close()  # Chiude la connessione al db.
 
     def key_exists(self, key):
-        # Checks if a key exists in the database only if the node is active.
+        # Verifica se una chiave esiste nel database solo se il nodo è attivo.
         if self.alive:
-            conn = sqlite3.connect(self.db_path)  # Connects to the database.
-            cursor = conn.cursor()  # Creates a cursor to execute SQL commands.
-            cursor.execute('''SELECT 1 FROM kv_store WHERE key=?''', (key,))  # Checks if the key exists.
-            exists = cursor.fetchone() is not None  # Checks if at least one row was found.
-            conn.close()  # Closes the connection to the database.
-            return exists  # Returns True if the key exists, otherwise False.
+            conn = sqlite3.connect(self.db_path)  #  Si connette al db
+            cursor = conn.cursor()  # Crea un cursore per eseguire comandi SQL.
+            cursor.execute('''SELECT 1 FROM kv_store WHERE key=?''', (key,))  # Verifica se la chiave esiste.
+            exists = cursor.fetchone() is not None  # Verifica se è stata trovata almeno una riga.
+            conn.close()  # Chiude la connessione al db.
+            return exists  # Restituisce True se trovato, altrimenti False.
 
     def fail(self):
-        # Simulates the failure of the node by setting its state to inactive.
+        # Simula il fallimento del nodo impostando il suo stato su inattivo.
         self.alive = False
 
     def recover(self, active_nodes, strategy='full'):
-        # Recovers the node and synchronizes data with other active nodes.
+        # Recupera il nodo e sincronizza i dati con gli altri nodi attivi.
         if not self.alive:
-            self.alive = True  # Sets the node's state to active.
+            self.alive = True  # Setta il nodo attivo
             if strategy == 'full':
-                self.sync_with_active_nodes(active_nodes)  # Synchronizes with other active nodes.
+                self.sync_with_active_nodes(active_nodes)  # Sincronizza con gli altri nodi attivi.
 
     def is_alive(self):
-        # Returns the current state of the node.
+        # Restituisce lo stato corrente del nodo
         return self.alive
 
     def sync_with_active_nodes(self, active_nodes):
-        # Synchronizes the node's data with other active nodes.
-        all_keys = set()  # Initializes a set to store all keys.
+        # Sincronizza i dati del nodo con gli altri nodi attivi.
+        all_keys = set()  # Inizializza un set per memorizzare tutte le chiavi.
         for node in active_nodes:
             if node.is_alive() and node.node_id != self.node_id:
-                conn = sqlite3.connect(node.db_path)  # Connects to the other node's database.
-                cursor = conn.cursor()  # Creates a cursor to execute SQL commands.
-                cursor.execute('''SELECT key, value FROM kv_store''')  # Selects all key-value pairs.
-                rows = cursor.fetchall()  # Retrieves all rows.
-                conn.close()  # Closes the connection to the database.
+                conn = sqlite3.connect(node.db_path)  # Si connette al database dell'altro nodo.
+                cursor = conn.cursor()  #  Crea un cursore per eseguire comandi SQL.
+                cursor.execute('''SELECT key, value FROM kv_store''')  # Seleziona tutte le coppie key-valore.
+                rows = cursor.fetchall()  # Recupera tutte le righe.
+                conn.close()  # Chiude la connessione al db
                 for key, value in rows:
-                    self.write(key, value)  # Writes each key-value pair to the current node's database.
-                    all_keys.add(key)  # Adds the key to the set of all keys.
+                    self.write(key, value)  # Scrive ogni coppia chiave-valore nel database del nodo corrente.
+                    all_keys.add(key)  # Aggiunge la chiave all'insieme di tutte le chiavi.
 
-        # Retrieve all keys from self.
+        # Recupera tutte le chiavi.
         # si connette al nodo ricoverato e recupera tutte le chiavi al suo interno ,
-        conn = sqlite3.connect(self.db_path)  # Connects to the current node's database.
-        cursor = conn.cursor()  # Creates a cursor to execute SQL commands.
-        cursor.execute('''SELECT key FROM kv_store''')  # Selects all keys.
-        self_keys = cursor.fetchall()  # Retrieves all keys.
-        conn.close()  # Closes the connection to the database.
+        conn = sqlite3.connect(self.db_path)  # Si connette al database del nodo corrente.
+        cursor = conn.cursor()  # Crea un cursore per eseguire comandi SQL.
+        cursor.execute('''SELECT key FROM kv_store''')  # Seleziona tutte le key
+        self_keys = cursor.fetchall()  # Recupera tutte le key
+        conn.close()  # Chiude la connessione al db.
 
-        # Remove keys from self that are not present in other active nodes.
+        # Rimuove le chiavi da self che non sono presenti negli altri nodi attivi.
         for (key,) in self_keys:
             if key not in all_keys:
-                self.delete(key)  # Deletes the key from the current node's database.
+                self.delete(key)  # Elimina la chiave dal database del nodo corrente.
 
     def get_all_keys(self):
         conn = sqlite3.connect(self.db_path)
@@ -120,13 +120,13 @@ class ReplicaNode:
 
 class ReplicationManager:
     def __init__(self, nodes_db=3, port=5000, strategy='full', replication_factor=None):
-        # Initializes the replication manager with a specified replication factor.
+        # Inizializza il gestore della replica con un fattore di replica specificato.
         self.nodes_db = nodes_db
-        # Initializes the replication strategy to 'full' by default.
+        # Inizializza la strategia di replica a 'full' per impostazione predefinita.
         self.strategy = strategy
-        # Creates a list of replica nodes with unique identifiers and ports.
+        # Crea un elenco di nodi replica con identificatori unici e porte.
         self.nodes = [ReplicaNode(i, port + i) for i in range(self.nodes_db)]
-        # Initializes the replication strategy based on the specified strategy.
+        # Inizializza la strategia di replica in base alla strategia specificata.
         self.consistent_hash = None
 
         if strategy == 'consistent':
@@ -142,12 +142,12 @@ class ReplicationManager:
             self.consistent_hash = None
 
     def write_to_replicas(self, key, value):
-        # Writes a key-value pair to all active replica nodes.
+        # Scrive una coppia chiave-valore su tutti i nodi replica attivi.
         if self.strategy == 'full':
             for node in self.nodes:
-                if node.is_alive():  # Checks if the node is active.
-                    node.write(key, value)  # Writes the data to the node.
-        # If the replication strategy is 'consistent', writes to the appropriate node based on the key's hash.
+                if node.is_alive():  # Verifica se il nodo è attivo
+                    node.write(key, value)  # Scrive sul nodo.
+        # Se la strategia di replica è 'consistent', scrive sul nodo appropriato in base all'hash della chiave.
         elif self.strategy == 'consistent':
             nodes = self.consistent_hash.get_nodes_for_key(key)
             for node in nodes:
@@ -155,38 +155,38 @@ class ReplicationManager:
                     node.write(key, value)
 
     def read_from_replicas(self, key):
-        # Reads the value associated with a key from active replica nodes.
+        # Legge il valore associato a una chiave dai nodi replica attivi.
         if self.strategy == 'full':
             for node in self.nodes:
-                if node.is_alive():  # Checks if the node is active.
-                    result = node.read(key)  # Reads the value from the node.
-                    if result is not None:  # If the result is not None, returns the value and a message.
+                if node.is_alive():  # Verifica se il nodo è attivo
+                    result = node.read(key)  # Legge il valore associato al nodo
+                    if result is not None:  # Se il risultato non è None, Restituisce il valore e un messaggio..
                         return {'value': result, 'message': f'Read from replica {node.node_id}'}
-        # If the replication strategy is 'consistent', reads from the appropriate node based on the key's hash.
+        # Se la strategia di replica è 'consistent', scrive sul nodo appropriato in base all'hash della chiave.
         elif self.strategy == 'consistent':
             node = self.consistent_hash.get_node(key)
             if node and node.is_alive():
                 result = node.read(key)
                 if result is not None:
                     return {'value': result, 'message': f'Read from replica {node.node_id}'}
-        # If no node returned a value, returns an error message.
+        # Se nessun nodo ha restituito un valore, restituisce un messaggio di errore.
         return {'value': None, 'message': 'All replicas failed or key not found'}
 
     def delete_from_replicas(self, key):
-        # Deletes a key from all replica nodes.
+        # Elimina una chiave da tutti i nodi replica.
         for node in self.nodes:
-            node.delete(key)  # Calls the delete method on each node.
+            node.delete(key)  # Richiama il metodo di eliminazione su ciascun nodo.
 
     def key_exists_in_replicas(self, key):
-        # Checks if a key exists in at least one of the active replica nodes.
+        # Verifica se una chiave esiste in almeno uno dei nodi replica attivi.
         for node in self.nodes:
-            if node.is_alive() and node.key_exists(key):  # Checks if the key exists in the active node.
-                return True  # Returns True if the key exists.
-        return False  # Returns False if the key was not found in any active node.
+            if node.is_alive() and node.key_exists(key):  # Verifica se la chiave esiste nel nodo attivo.
+                return True  # Ritorna True se la jey esiste.
+        return False  # Restituisce False se la chiave non è stata trovata in nessun nodo attivo.
 
     def fail_node(self, node_id):
-        # Simulates the failure of a specific node identified by node_id.
-        if 0 <= node_id < len(self.nodes):  # Checks if the node ID is valid.
+        # Simula il fallimento di un nodo specifico identificato da node_id.
+        if 0 <= node_id < len(self.nodes):  # Fa un check per vedere se l'ID esiste.
             node = self.nodes[node_id]
             node.fail()
             if self.strategy == 'consistent':
@@ -202,12 +202,12 @@ class ReplicationManager:
                 self.consistent_hash.recover_node(node)  # Recupera le chiavi nel nodo consistent hash
 
     def get_nodes_status(self):
-        # Returns the status of all nodes in a list of dictionaries.
+        # Restituisce lo stato di tutti i nodi in un elenco di dizionari.
         return [
             {
-                'node_id': node.node_id,  # ID of the node.
-                'status': 'alive' if node.is_alive() else 'dead',  # Status of the node (active or inactive).
-                'port': node.port  # Port of the node.
+                'node_id': node.node_id,  # ID del nodo
+                'status': 'alive' if node.is_alive() else 'dead',  # Stato del nodo (attivo o non ).
+                'port': node.port  # Porta del nodo.
             }
             for node in self.nodes
         ]
