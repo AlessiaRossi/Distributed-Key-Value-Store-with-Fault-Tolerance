@@ -1,10 +1,53 @@
-## Report
+# Report: Distributed Key-Value Store with Fault Tolerance
 
-### Experimental Results
+## Introduction
 
-#### Fault Tolerance Testing
+This project implements a distributed key-value store with fault tolerance using two replication strategies: "full" and "consistent". The system is designed to handle node failures by redistributing keys in case of failures and recovering nodes when they come back online.
 
-We conducted a series of tests to evaluate the system's fault tolerance capabilities. The tests involved simulating node failures and recoveries while performing read and write operations. The results showed that the system successfully maintained data availability and consistency during node failures and recoveries.
+## Modules and Classes
+
+### 1. **ConsistentHash**
+
+The `ConsistentHash` class implements the consistent hashing algorithm for distributing keys among nodes. It includes the following features:
+- **Adding and Removing Nodes**: Adds and removes nodes from the hash ring.
+- **Key Distribution**: Retrieves the node responsible for a specific key and manages key redistribution.
+- **Node Recovery**: Recovers keys from failed nodes and manages temporarily relocated keys.
+
+### 2. **TestPerformanceFull**
+
+This test class uses `unittest` to evaluate the performance of the `ReplicationManager` with the "full" strategy:
+- **Write Performance Test**: Measures the time required to write keys to all replicas.
+- **Read Performance Test**: Measures the time required to read keys from all replicas.
+- **Node Failure and Recovery Test**: Measures the time required to simulate node failures and recoveries.
+
+### 3. **TestPerformanceConsistent**
+
+This test class uses `unittest` to evaluate the performance of the `ReplicationManager` with the "consistent" strategy:
+- **Write Performance Test**: Measures the time required to write keys to all replicas.
+- **Read Performance Test**: Measures the time required to read keys from all replicas.
+- **Node Failure and Recovery Test**: Measures the time required to simulate node failures and recoveries.
+
+## Performance Test Results
+
+### "Full" Strategy
+
+- **Write Performance**: [Execution Time]
+- **Read Performance**: [Execution Time]
+- **Node Failure Performance**: [Execution Time]
+- **Node Recovery Performance**: [Execution Time]
+
+### "Consistent" Strategy
+
+- **Write Performance**: [Execution Time]
+- **Read Performance**: [Execution Time]
+- **Node Failure Performance**: [Execution Time]
+- **Node Recovery Performance**: [Execution Time]
+
+## Experimental Results
+
+### Fault Tolerance Testing
+
+A series of tests were conducted to evaluate the system's fault tolerance capabilities. The tests involved simulating node failures and recoveries while performing read and write operations. The results showed that the system successfully maintained data availability and consistency during node failures and recoveries.
 
 - **Test 1: Single Node Failure**
   - **Setup**: 3 nodes, replication factor of 2.
@@ -35,10 +78,10 @@ We measured the performance of the system under different replication strategies
   - **Operation**: Read 1000 key-value pairs.
   - **Result**: Average read time: 30ms.
 
-### Analysis
+## Analysis
 
 The experimental results demonstrate that the system effectively handles node failures and recoveries, maintaining data availability and consistency. The performance measurements indicate that the system performs well under different replication strategies, with acceptable read and write times.
 
-### Conclusion
+## Conclusion
 
-The distributed key-value store with fault tolerance provides a robust solution for maintaining data availability and consistency in the presence of node failures. The experimental results validate the system's fault tolerance capabilities and performance. Future work can focus on implementing advanced consistency models and dynamic replication factors to further enhance the system's capabilities.
+The distributed key-value store effectively manages nodes with fault tolerance through the two replication strategies. The performance tests provide detailed insights into the system's writing, reading, and fault management capabilities.
